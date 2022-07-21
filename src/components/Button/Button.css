@@ -1,0 +1,62 @@
+html,
+body {
+  height: 100%;
+  overflow: hidden;
+}
+
+body {
+  color: #6699cc;
+  font-size: 22px;
+  font-weight: bold;
+  text-align: center;
+  -webkit-font-smoothing: antialiased;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: #c594c5;
+  background-size: cover;
+  background-position: center;
+  background-image: linear-gradient(rgba(173, 216, 230, 0.4), rgba(221, 160, 221, 0.4)), url("https://i.imgsafe.org/1fee5c9.jpg");
+}
+
+.fancy-button {
+  position: relative;
+  display: block;
+  cursor: pointer;
+  perspective: 1800px;
+}
+.fancy-button .fancy-flipper {
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  transform-style: preserve-3d;
+  transform: rotateX(-90deg);
+  transition: transform 0.3s ease;
+}
+.fancy-button .fancy-front,
+.fancy-button .fancy-back {
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  -webkit-backface-visibility: hidden;
+          backface-visibility: hidden;
+}
+.fancy-button .fancy-front svg,
+.fancy-button .fancy-back svg {
+  display: block;
+}
+.fancy-button:hover .fancy-flipper {
+  transform: rotateX(0deg);
+}
+.fancy-button:active .fancy-flipper {
+  transform: rotateX(0deg) scale(0.95);
+  transition: transform 0.05s ease;
+}
+.fancy-button .button-text {
+  letter-spacing: 0.01em;
+  font-family: Futura, "Helvetica Neue", Helvetica, sans-serif;
+}
