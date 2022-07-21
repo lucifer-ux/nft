@@ -26,7 +26,7 @@ const ButtonEnalbled = () =>{
 const mintContract = () =>{
   const nftContract = createWriteContract()
   
-  let nftTx = nftContract.becomeAChad({value: 1})
+  let nftTx = nftContract.becomeAChad({value: contractBalance._hex + 1})
 				console.log('Mining....', nftTx.hash)
 				// setMiningStatus(0)
 
