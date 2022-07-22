@@ -1,4 +1,4 @@
-const booleanCheckValues = {
+let booleanCheckValues = {
     walletBalanceCheck : true,
     hasMintedYetValue : true
 }

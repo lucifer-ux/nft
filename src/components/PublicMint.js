@@ -9,13 +9,15 @@ import createWriteContract from "./createWriteContract";
 
 const PublicMint = () => {
   const [boolValue, setBoolValue] = useState(false)
+  const [loadingComp, setLoadingComp] = useState(false)
+  const [transState, setTransState] = useState(null)
 
   useEffect (() =>{
     contractRead.isPublicMintLive()
     .then((res)=>{
       setBoolValue(res)
     })
-    } ,[])
+    } ,[loadingComp])
 
 const ButtonEnalbled = () =>{
   return boolValue
@@ -47,6 +49,7 @@ const checkCorrectNetwork = async () => {
 }
 const mintContract  = async (contractBalance) =>{
   const nftContract = createWriteContract()
+  try {
   let nftTx = await nftContract.becomeAChad({value: contractBalance._hex + 1})
 				console.log('Mining....', nftTx.hash)
         console.log("nftTx"+":"+ nftTx ) 
@@ -55,68 +58,65 @@ const mintContract  = async (contractBalance) =>{
 				let event = tx.events[0]
 				let value = event.args[2]
 				let tokenId = value.toNumber()
-				console.log(
-					`Mined, see transaction: https://rinkeby.etherscan.io/tx/${nftTx.hash}`
-				)
+				
+					setTransState(`Mined, see transaction: https://rinkeby.etherscan.io/tx/${nftTx.hash}`)
+        }
+        catch (error) {
+          console.log('Error minting', error)
+          setTransState(error.message)
+        }
 }
 
 const mintingProcess = async () =>{
+  setLoadingComp(true)
   let returnArray = await ConnectWalletHandler();
   let walletAddress = returnArray[0]
+  console.log("walletAddress: " + walletAddress)
   let walletBalance = returnArray[1]
+  console.log("walletBalance: " + walletBalance)
   checkCorrectNetwork();
-  let contractBalance = CheckPublicMint(walletAddress,walletBalance);
+  let contractBalance = await CheckPublicMint(walletAddress,walletBalance);
+  console.log("publicMintPrice: " + contractBalance)
   if(booleanCheckValues.hasMintedYetValue && booleanCheckValues.walletBalanceCheck){
     await mintContract(contractBalance);
   }
+  setLoadingComp(false)
 
 }
 
-const CheckPublicMint = (defaultAccount,userBalance) => {
-  let contractBalance = contractRead.publicMintPrice()
-  .then(resolve =>{
-    console.log(resolve)
-    console.log(userBalance)
-    return resolve
-  })
+const CheckPublicMint = async (defaultAccount,userBalance) => {
+  let contractBalance = await contractRead.publicMintPrice()
   
-  let hasmintedYet = contractRead.hasMinted(defaultAccount)
-  .then((res) => {
-  return res
-  })
+  let hasmintedYet = await contractRead.hasMinted(defaultAccount)
 
   if(hasmintedYet){
     booleanCheckValues.hasMintedYetValue = false
-    console.log("booleanCheckValueshasMintedYetValue")
+    console.log("already minted")
   }
   if (userBalance <= contractBalance._hex)
   {
     booleanCheckValues.walletBalanceCheck = false
+    console.log("low balance")
   }
   return contractBalance
 }
 
-  const ConnectWalletHandler = () => {
+  const ConnectWalletHandler = async () => {
     if (window.ethereum) {
-      return (window.ethereum
+      let addresses = await window.ethereum
         .request({ method: "eth_requestAccounts" })
-        .then((result) => {
-          let userBalance = accountChangeHandler(result[0]);
-          return [result[0],userBalance];
-        }))
+        let userBalance = await accountChangeHandler(addresses[0]);
+        return [addresses[0], userBalance]
     } 
   };
 
-  const accountChangeHandler = (newAccount) => {
-    let userBalance = getUserBalance(newAccount);
+  const accountChangeHandler = async (newAccount) => {
+    let userBalance = await getUserBalance(newAccount);
     return userBalance
   };
-  const getUserBalance = (address) => {
-   return( window.ethereum
+  const getUserBalance = async (address) => {
+   return await window.ethereum
       .request({ method: "eth_getBalance", params: [address, "latest"] })
-      .then((balance) => {
-        return balance
-      }))
   };
   const chainChangedHandler = () => {
     window.location.reload();
@@ -128,14 +128,20 @@ const CheckPublicMint = (defaultAccount,userBalance) => {
     <div>
       {/* <h1>balance : {userBalance}</h1> wallet balance
       <h1>account : {defaultAccount}</h1> wallet address */}
+      <h1>
+      {!booleanCheckValues.hasMintedYetValue && !loadingComp && ("Already minted")}
+      </h1>
+      <h1>
+        {!booleanCheckValues.walletBalanceCheck && !loadingComp && ("low balance")}
+      </h1>
+      <h1>
+        {transState!=null && !loadingComp && (transState)}
+      </h1>
+      <h1>
+        {loadingComp && ("Loading...")}
+      </h1>
       <div onClick={mintingProcess}> 
-      <h1>
-      {!booleanCheckValues.hasMintedYetValue && ("aleready minted")}
-      </h1>
-      <h1>
-        {!booleanCheckValues.walletBalanceCheck && ("low balance")}
-      </h1>
-        <Button buttonText="direct Mint"  />
+        <Button buttonText="Public Mint"  />
 
       </div>
     </div>
