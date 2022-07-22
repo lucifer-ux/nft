@@ -6,13 +6,10 @@ import { contractRead } from "./resources/ReadContract";
 import { useEffect } from 'react';
 import booleanCheckValues from "./resources/booleanCheckValues";
 import createWriteContract from "./createWriteContract";
+
 const PublicMint = () => {
-  const [errorMessage, setErrorMessage] = useState(null);
-  const [defaultAccount, setdefaultAccount] = useState(null);
-  const [userBalance, setuserBalance] = useState(null);
-  const [contractBalance, setContractBalance] = useState(null);
   const [boolValue, setBoolValue] = useState(false)
-  const [hasmintedYet, setHasMintedYet] = useState(null)
+
   useEffect (() =>{
     contractRead.isPublicMintLive()
     .then((res)=>{
@@ -23,15 +20,37 @@ const PublicMint = () => {
 const ButtonEnalbled = () =>{
   return boolValue
 }
-const mintContract = () =>{
-  const nftContract = createWriteContract()
-  
-  let nftTx = nftContract.becomeAChad({value: contractBalance._hex + 1})
-				console.log('Mining....', nftTx.hash)
-				// setMiningStatus(0)
 
-				let tx = nftTx.wait()
-				// setLoadingState(1)
+const checkCorrectNetwork = async () => {
+  if (window.ethereum.networkVersion !== 4) {
+    try {
+      await window.ethereum.request({
+        method: 'wallet_switchEthereumChain',
+        params: [{ chainId: ethers.utils.hexValue(4) }]
+      });
+    } catch (err) {
+      if (err.code === 4902) {
+        await window.ethereum.request({
+          method: 'wallet_addEthereumChain',
+          params: [
+            {
+              chainName: 'Rinkeby Mainnet',
+              chainId: ethers.utils.hexValue(4),
+              nativeCurrency: { name: 'ETH', decimals: 18, symbol: 'ETH' },
+              rpcUrls: ['https://rinkeby.infura.io/v3/']
+            }
+          ]
+        });
+      }
+    }
+  }
+}
+const mintContract  = async (contractBalance) =>{
+  const nftContract = createWriteContract()
+  let nftTx = await nftContract.becomeAChad({value: contractBalance._hex + 1})
+				console.log('Mining....', nftTx.hash)
+        console.log("nftTx"+":"+ nftTx ) 
+				let tx = await nftTx.wait()
 				console.log('Mined!', tx)
 				let event = tx.events[0]
 				let value = event.args[2]
@@ -39,30 +58,33 @@ const mintContract = () =>{
 				console.log(
 					`Mined, see transaction: https://rinkeby.etherscan.io/tx/${nftTx.hash}`
 				)
-				// getMintedNFT(tokenId)
 }
 
-const mintingProcess = () =>{
-  ConnectWalletHandler();
-  CheckPublicMint();
-  mintContract();
+const mintingProcess = async () =>{
+  let returnArray = await ConnectWalletHandler();
+  let walletAddress = returnArray[0]
+  let walletBalance = returnArray[1]
+  checkCorrectNetwork();
+  let contractBalance = CheckPublicMint(walletAddress,walletBalance);
+  if(booleanCheckValues.hasMintedYetValue && booleanCheckValues.walletBalanceCheck){
+    await mintContract(contractBalance);
+  }
+
 }
 
-const CheckPublicMint = () => {
-  contractRead.publicMintPrice()
+const CheckPublicMint = (defaultAccount,userBalance) => {
+  let contractBalance = contractRead.publicMintPrice()
   .then(resolve =>{
-    setContractBalance(resolve);
     console.log(resolve)
     console.log(userBalance)
+    return resolve
   })
   
-  contractRead.hasMinted(defaultAccount)
+  let hasmintedYet = contractRead.hasMinted(defaultAccount)
   .then((res) => {
-  setHasMintedYet(res)
+  return res
   })
 
-  console.log("hasmintedYet")
-  console.log(hasmintedYet)
   if(hasmintedYet){
     booleanCheckValues.hasMintedYetValue = false
     console.log("booleanCheckValueshasMintedYetValue")
@@ -71,32 +93,30 @@ const CheckPublicMint = () => {
   {
     booleanCheckValues.walletBalanceCheck = false
   }
-  
+  return contractBalance
 }
 
   const ConnectWalletHandler = () => {
     if (window.ethereum) {
-      window.ethereum
+      return (window.ethereum
         .request({ method: "eth_requestAccounts" })
         .then((result) => {
-          accountChangeHandler(result[0]);
-        });
-    } else {
-      setErrorMessage("Install Metamask");
-    }
-
+          let userBalance = accountChangeHandler(result[0]);
+          return [result[0],userBalance];
+        }))
+    } 
   };
 
   const accountChangeHandler = (newAccount) => {
-    setdefaultAccount(newAccount);
-    getUserBalance(newAccount);
+    let userBalance = getUserBalance(newAccount);
+    return userBalance
   };
   const getUserBalance = (address) => {
-    window.ethereum
+   return( window.ethereum
       .request({ method: "eth_getBalance", params: [address, "latest"] })
       .then((balance) => {
-        setuserBalance(balance);
-      });
+        return balance
+      }))
   };
   const chainChangedHandler = () => {
     window.location.reload();
