@@ -7,7 +7,6 @@ import abi from './resources/abi'
 			const { ethereum } = window
 
 			if (ethereum) {
-				console.log(providers)
 				const provider = new ethers.providers.Web3Provider(ethereum);
 				const signer = provider.getSigner()
 				const nftContract = new ethers.Contract(
@@ -15,7 +14,6 @@ import abi from './resources/abi'
 					abi,
 					signer
 				)
-				console.log("value")
                 return nftContract
 			} else {
 				console.log("Ethereum object doesn't exist!")

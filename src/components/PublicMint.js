@@ -3,120 +3,131 @@ import Button from "./Button/Button";
 import { useState } from "react";
 import { ethers } from "ethers";
 import { contractRead } from "./resources/ReadContract";
-import { useEffect } from 'react';
+import { useEffect } from "react";
 import booleanCheckValues from "./resources/booleanCheckValues";
 import createWriteContract from "./createWriteContract";
-
+import ErrorModal from "./ErrorModal/ErrorModal";
+import "../App.css"
 const PublicMint = () => {
-  const [boolValue, setBoolValue] = useState(false)
+  const [boolValue, setBoolValue] = useState(false);
+  const [loadingComp, setLoadingComp] = useState(false);
+  const [transState, setTransState] = useState(null);
+  const [errorModalValue, setErrorModalValue] = useState(false);
 
-  useEffect (() =>{
-    contractRead.isPublicMintLive()
-    .then((res)=>{
-      setBoolValue(res)
-    })
-    } ,[])
+  useEffect(() => {
+    contractRead.isPublicMintLive().then((res) => {
+      setBoolValue(res);
+    });
+  }, [loadingComp]);
 
-const ButtonEnalbled = () =>{
-  return boolValue
-}
+  const ButtonEnalbled = () => {
+    return boolValue;
+  };
 
-const checkCorrectNetwork = async () => {
-  if (window.ethereum.networkVersion !== 4) {
-    try {
-      await window.ethereum.request({
-        method: 'wallet_switchEthereumChain',
-        params: [{ chainId: ethers.utils.hexValue(4) }]
-      });
-    } catch (err) {
-      if (err.code === 4902) {
+  const checkCorrectNetwork = async () => {
+    if (window.ethereum.networkVersion !== 4) {
+      try {
         await window.ethereum.request({
-          method: 'wallet_addEthereumChain',
-          params: [
-            {
-              chainName: 'Rinkeby Mainnet',
-              chainId: ethers.utils.hexValue(4),
-              nativeCurrency: { name: 'ETH', decimals: 18, symbol: 'ETH' },
-              rpcUrls: ['https://rinkeby.infura.io/v3/']
-            }
-          ]
+          method: "wallet_switchEthereumChain",
+          params: [{ chainId: ethers.utils.hexValue(4) }],
         });
+      } catch (err) {
+        if (err.code === 4902) {
+          await window.ethereum.request({
+            method: "wallet_addEthereumChain",
+            params: [
+              {
+                chainName: "Rinkeby Mainnet",
+                chainId: ethers.utils.hexValue(4),
+                nativeCurrency: { name: "ETH", decimals: 18, symbol: "ETH" },
+                rpcUrls: ["https://rinkeby.infura.io/v3/"],
+              },
+            ],
+          });
+        }
       }
     }
-  }
-}
-const mintContract  = async (contractBalance) =>{
-  const nftContract = createWriteContract()
-  let nftTx = await nftContract.becomeAChad({value: contractBalance._hex + 1})
-				console.log('Mining....', nftTx.hash)
-        console.log("nftTx"+":"+ nftTx ) 
-				let tx = await nftTx.wait()
-				console.log('Mined!', tx)
-				let event = tx.events[0]
-				let value = event.args[2]
-				let tokenId = value.toNumber()
-				console.log(
-					`Mined, see transaction: https://rinkeby.etherscan.io/tx/${nftTx.hash}`
-				)
-}
+  };
+  const mintContract = async (contractBalance) => {
+    const nftContract = createWriteContract();
+    try {
+      let nftTx = await nftContract.becomeAChad({
+        value: contractBalance._hex + 1,
+      });
+      console.log("Mining....", nftTx.hash);
+      console.log("nftTx" + ":" + nftTx);
+      let tx = await nftTx.wait();
+      console.log("Mined!", tx);
+      let event = tx.events[0];
+      let value = event.args[2];
+      let tokenId = value.toNumber();
 
-const mintingProcess = async () =>{
-  let returnArray = await ConnectWalletHandler();
-  let walletAddress = returnArray[0]
-  let walletBalance = returnArray[1]
-  checkCorrectNetwork();
-  let contractBalance = CheckPublicMint(walletAddress,walletBalance);
-  if(booleanCheckValues.hasMintedYetValue && booleanCheckValues.walletBalanceCheck){
-    await mintContract(contractBalance);
-  }
+      setTransState(
+        `Mined, see transaction: https://rinkeby.etherscan.io/tx/${nftTx.hash}`
+      );
+    } catch (error) {
+      console.log("Error minting", error);
+      setTransState(error.message);
+    }
+    setErrorModalValue(true)
+  };
 
-}
+  const mintingProcess = async () => {
+    setLoadingComp(true);
+    let returnArray = await ConnectWalletHandler();
+    let walletAddress = returnArray[0];
+    console.log("walletAddress: " + walletAddress);
+    let walletBalance = returnArray[1];
+    console.log("walletBalance: " + walletBalance);
+    checkCorrectNetwork();
+    let contractBalance = await CheckPublicMint(walletAddress, walletBalance);
+    console.log("publicMintPrice: " + contractBalance);
+    if (
+      booleanCheckValues.hasMintedYetValue &&
+      booleanCheckValues.walletBalanceCheck
+    ) {
+      await mintContract(contractBalance);
+    }
+    setLoadingComp(false);
+  };
 
-const CheckPublicMint = (defaultAccount,userBalance) => {
-  let contractBalance = contractRead.publicMintPrice()
-  .then(resolve =>{
-    console.log(resolve)
-    console.log(userBalance)
-    return resolve
-  })
-  
-  let hasmintedYet = contractRead.hasMinted(defaultAccount)
-  .then((res) => {
-  return res
-  })
+  const CheckPublicMint = async (defaultAccount, userBalance) => {
+    let contractBalance = await contractRead.publicMintPrice();
 
-  if(hasmintedYet){
-    booleanCheckValues.hasMintedYetValue = false
-    console.log("booleanCheckValueshasMintedYetValue")
-  }
-  if (userBalance <= contractBalance._hex)
-  {
-    booleanCheckValues.walletBalanceCheck = false
-  }
-  return contractBalance
-}
+    let hasmintedYet = await contractRead.hasMinted(defaultAccount);
 
-  const ConnectWalletHandler = () => {
+    if (hasmintedYet) {
+      booleanCheckValues.hasMintedYetValue = false;
+      setErrorModalValue(true);
+      console.log("already minted");
+    }
+    if (userBalance <= contractBalance._hex) {
+      booleanCheckValues.walletBalanceCheck = false;
+      setErrorModalValue(true);
+      console.log("low balance");
+    }
+    return contractBalance;
+  };
+
+  const ConnectWalletHandler = async () => {
     if (window.ethereum) {
-      return (window.ethereum
-        .request({ method: "eth_requestAccounts" })
-        .then((result) => {
-          let userBalance = accountChangeHandler(result[0]);
-          return [result[0],userBalance];
-        }))
-    } 
+      let addresses = await window.ethereum.request({
+        method: "eth_requestAccounts",
+      });
+      let userBalance = await accountChangeHandler(addresses[0]);
+      return [addresses[0], userBalance];
+    }
   };
 
-  const accountChangeHandler = (newAccount) => {
-    let userBalance = getUserBalance(newAccount);
-    return userBalance
+  const accountChangeHandler = async (newAccount) => {
+    let userBalance = await getUserBalance(newAccount);
+    return userBalance;
   };
-  const getUserBalance = (address) => {
-   return( window.ethereum
-      .request({ method: "eth_getBalance", params: [address, "latest"] })
-      .then((balance) => {
-        return balance
-      }))
+  const getUserBalance = async (address) => {
+    return await window.ethereum.request({
+      method: "eth_getBalance",
+      params: [address, "latest"],
+    });
   };
   const chainChangedHandler = () => {
     window.location.reload();
@@ -125,18 +136,45 @@ const CheckPublicMint = (defaultAccount,userBalance) => {
   window.ethereum.on("chainChanged", chainChangedHandler);
 
   return (
-    <div>
+    <div >
       {/* <h1>balance : {userBalance}</h1> wallet balance
       <h1>account : {defaultAccount}</h1> wallet address */}
-      <div onClick={mintingProcess}> 
       <h1>
-      {!booleanCheckValues.hasMintedYetValue && ("aleready minted")}
+        {!booleanCheckValues.hasMintedYetValue &&
+          !loadingComp &&
+          errorModalValue && (
+            <ErrorModal
+              text="Aleready minted!!"
+              body="You can mint only once"
+              buttonText="Go back"
+              setErrorModalValue={setErrorModalValue}
+            />
+          )}
       </h1>
       <h1>
-        {!booleanCheckValues.walletBalanceCheck && ("low balance")}
+        {!booleanCheckValues.walletBalanceCheck &&
+          !loadingComp &&
+          errorModalValue && (
+            <ErrorModal
+              text="Low Wallet Balance!!"
+              body="You dont have what it takes to become a chad"
+              buttonText="Go back"
+              setErrorModalValue={setErrorModalValue}
+            />
+          )}
       </h1>
-        <Button buttonText="direct Mint"  />
-
+      {transState != null && !loadingComp && errorModalValue && (
+            <ErrorModal
+              text="Transaction Status!!"
+              body = {transState}
+              buttonText="Ok"
+              setErrorModalValue={setErrorModalValue}
+              link = ""
+            />
+          )}
+      <h1>{loadingComp && "Loading..."}</h1>
+      <div onClick={mintingProcess}>
+        <Button  buttonText="Public Mint" />
       </div>
     </div>
   );

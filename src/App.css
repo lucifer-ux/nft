@@ -1,13 +1,13 @@
 .App {
   text-align: center;
 }
-
-
-
 .flexBox{
   display: flex;
   flex-direction: row;
 }
 .flexBox > div{
   margin: 50px;
+}
+.hidden{
+  visibility: hidden;
 }
