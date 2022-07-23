@@ -6,6 +6,8 @@ import booleanCheckValuesForReferralMint from "./resources/booleanCheckValuesFor
 import { contractRead } from "./resources/ReadContract";
 import ErrorModal from "./ErrorModal/ErrorModal";
 import RedirectForm from "./RedirectForm/RedirectForm";
+import { Link } from "react-router-dom";
+
 const ReferralButton = () => {
   const [boolValue, setBoolValue] = useState(false);
   const [loadingComp, setLoadingComp] = useState(false);
@@ -54,16 +56,16 @@ const ReferralButton = () => {
     let walletBalance = returnArray[1];
     console.log("walletBalance: " + walletBalance);
     checkCorrectNetwork();
-    await CheckReferralMint(walletAddress, walletBalance);
+    let contractBalance =  await CheckReferralMint(walletAddress, walletBalance);
 
-    console.log("minReferralMintPrice: ");
+    console.log("minReferralMintPrice:"+ contractBalance._hex);
  
     setLoadingComp(false);
   };
 
   const CheckReferralMint = async (defaultAccount, userBalance) => {
     let contractBalance = await contractRead.minReferralMintPrice();
-
+    console.log(contractBalance)
     let hasmintedYet = await contractRead.hasMinted(defaultAccount);
 
     if (hasmintedYet) {
@@ -71,11 +73,14 @@ const ReferralButton = () => {
       setErrorModalValue(true);
       console.log("already minted");
     }
-    if (userBalance <= contractBalance._hex) {
+    if (userBalance > contractBalance._hex) {
+
+      console.log(userBalance <= contractBalance._hex)
       booleanCheckValuesForReferralMint.walletBalanceCheck = false;
       setErrorModalValue(true);
       console.log("low balance");
     }
+    return contractBalance
   };
 
 
@@ -135,9 +140,10 @@ const ReferralButton = () => {
           )}
       </h1>
       <h1>{loadingComp && "Loading..."}</h1>
-      <a href={RedirectForm}>
-        <Button  buttonText="Referral Mint" />
-      </a>
+      {booleanCheckValuesForReferralMint.walletBalanceCheck && booleanCheckValuesForReferralMint.hasMintedYetValue && !loadingComp && <Link to = "/form"></Link>}
+          <span onClick={mintingProcess}>
+        <Button  buttonText="Referral Mint"/>
+        </span>
     </div>  );
 };
 

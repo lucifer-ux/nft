@@ -1,17 +1,21 @@
 import './App.css';
-import DirectButton from './components/PublicMint';
-import PriorityButton from './components/priorityButton';
-import ReferralButton from './components/referralButton';
 import RedirectForm from './components/RedirectForm/RedirectForm';
+import {
+  BrowserRouter as Router,
+  Routes,
+  Route,
+  Navigate,
+} from "react-router-dom";
+import HomePage from './components/HomePage';
 function App() {
   return (
     <>
-    <div className='flexBox'>
-      <ReferralButton/>
-      <DirectButton/>
-      <PriorityButton/>
-    </div>
-    <RedirectForm/>
+    <Router>
+      <Routes>
+        <Route path = "/" element={<HomePage/>}/>
+        <Route path = "/form" element={<RedirectForm/>}/>
+      </Routes>
+    </Router>
     </>
   );
 }
