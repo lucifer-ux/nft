@@ -1,7 +1,6 @@
 let booleanCheckValues = {
     walletBalanceCheck : true,
-    hasMintedYetValue : true,
-    errorModalClose : true
+    hasMintedYetValue : true
 }
 
 export default booleanCheckValues;

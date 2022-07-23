@@ -1,21 +1,18 @@
 import React from "react";
 import Button from "./Button/Button";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { ethers } from "ethers";
+import booleanCheckValuesForReferralMint from "./resources/booleanCheckValuesForReferralMint";
 import { contractRead } from "./resources/ReadContract";
-import { useEffect } from "react";
-import booleanCheckValues from "./resources/booleanCheckValuesPublicMint";
-import createWriteContract from "./createWriteContract";
 import ErrorModal from "./ErrorModal/ErrorModal";
-import "../App.css"
-const PublicMint = () => {
+import RedirectForm from "./RedirectForm/RedirectForm";
+const ReferralButton = () => {
   const [boolValue, setBoolValue] = useState(false);
   const [loadingComp, setLoadingComp] = useState(false);
-  const [transState, setTransState] = useState(null);
   const [errorModalValue, setErrorModalValue] = useState(false);
 
   useEffect(() => {
-    contractRead.isPublicMintLive().then((res) => {
+    contractRead.isReferralMintLive().then((res) => {
       setBoolValue(res);
     });
   }, [loadingComp]);
@@ -48,24 +45,6 @@ const PublicMint = () => {
       }
     }
   };
-  const mintContract = async (contractBalance) => {
-    const nftContract = createWriteContract();
-    try {
-      let nftTx = await nftContract.becomeAChad({
-        value: contractBalance._hex + 1,
-      });
-      console.log("Mining....", nftTx.hash);
-      let tx = await nftTx.wait();
-      console.log("Mined!", tx);
-      setTransState(
-        `Mined, see transaction: https://rinkeby.etherscan.io/tx/${nftTx.hash}`
-      );
-    } catch (error) {
-      console.log("Error minting", error);
-      setTransState(error.message);
-    }
-    setErrorModalValue(true)
-  };
 
   const mintingProcess = async () => {
     setLoadingComp(true);
@@ -75,35 +54,30 @@ const PublicMint = () => {
     let walletBalance = returnArray[1];
     console.log("walletBalance: " + walletBalance);
     checkCorrectNetwork();
-    let contractBalance = await CheckPublicMint(walletAddress, walletBalance);
-    console.log("publicMintPrice: " + contractBalance);
-    if (
-      booleanCheckValues.hasMintedYetValue &&
-      booleanCheckValues.walletBalanceCheck
-    ) {
-      await mintContract(contractBalance);
-    }
+    await CheckReferralMint(walletAddress, walletBalance);
+
+    console.log("minReferralMintPrice: ");
+ 
     setLoadingComp(false);
   };
- 
 
-  const CheckPublicMint = async (defaultAccount, userBalance) => {
-    let contractBalance = await contractRead.publicMintPrice();
+  const CheckReferralMint = async (defaultAccount, userBalance) => {
+    let contractBalance = await contractRead.minReferralMintPrice();
 
     let hasmintedYet = await contractRead.hasMinted(defaultAccount);
 
     if (hasmintedYet) {
-      booleanCheckValues.hasMintedYetValue = false;
+      booleanCheckValuesForReferralMint.hasMintedYetValue = false;
       setErrorModalValue(true);
       console.log("already minted");
     }
     if (userBalance <= contractBalance._hex) {
-      booleanCheckValues.walletBalanceCheck = false;
+      booleanCheckValuesForReferralMint.walletBalanceCheck = false;
       setErrorModalValue(true);
       console.log("low balance");
     }
-    return contractBalance;
   };
+
 
   const ConnectWalletHandler = async () => {
     if (window.ethereum) {
@@ -131,12 +105,13 @@ const PublicMint = () => {
   window.ethereum.on("accountsChanged", accountChangeHandler);
   window.ethereum.on("chainChanged", chainChangedHandler);
 
+  // token id , minting price, referral code
   return (
     <div >
       {/* <h1>balance : {userBalance}</h1> wallet balance
       <h1>account : {defaultAccount}</h1> wallet address */}
       <h1>
-        {!booleanCheckValues.hasMintedYetValue &&
+        {!booleanCheckValuesForReferralMint.hasMintedYetValue &&
           !loadingComp &&
           errorModalValue && (
             <ErrorModal
@@ -148,7 +123,7 @@ const PublicMint = () => {
           )}
       </h1>
       <h1>
-        {!booleanCheckValues.walletBalanceCheck &&
+        {!booleanCheckValuesForReferralMint.walletBalanceCheck &&
           !loadingComp &&
           errorModalValue && (
             <ErrorModal
@@ -159,21 +134,11 @@ const PublicMint = () => {
             />
           )}
       </h1>
-      {transState != null && !loadingComp && errorModalValue && (
-            <ErrorModal
-              text="Transaction Status!!"
-              body = {transState}
-              buttonText="Ok"
-              setErrorModalValue={setErrorModalValue}
-              link = ""
-            />
-          )}
       <h1>{loadingComp && "Loading..."}</h1>
-      <div onClick={mintingProcess}>
-        <Button  buttonText="Public Mint" />
-      </div>
-    </div>
-  );
+      <a href={RedirectForm}>
+        <Button  buttonText="Referral Mint" />
+      </a>
+    </div>  );
 };
 
-export default PublicMint;
+export default ReferralButton;

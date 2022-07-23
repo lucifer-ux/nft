@@ -1,4 +1,3 @@
-import { providers } from './resources/ReadContract'
 import { ethers } from "ethers";
 
 import abi from './resources/abi'
