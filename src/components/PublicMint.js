@@ -97,7 +97,7 @@ const PublicMint = () => {
       setErrorModalValue(true);
       console.log("already minted");
     }
-    if (userBalance <= contractBalance._hex) {
+    if (ethers.BigNumber.from(userBalance).lte(contractBalance)) {
       booleanCheckValues.walletBalanceCheck = false;
       setErrorModalValue(true);
       console.log("low balance");

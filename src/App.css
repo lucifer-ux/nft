@@ -1,13 +1,22 @@
+body{
+  background-color: black;
+}
 .App {
   text-align: center;
 }
 .flexBox{
-  display: flex;
-  flex-direction: row;
-  margin-top: 550px;
+  min-width: 100vw;
 }
-.flexBox > div{
-  margin: .5%;
+.buttons > div{
+  margin: 1%;
+}
+.buttons{
+  display: flex;
+  min-height: 100vh;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+
 }
 .hidden{
   visibility: hidden;

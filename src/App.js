@@ -7,9 +7,11 @@ import {
   Navigate,
 } from "react-router-dom";
 import HomePage from './components/HomePage';
+import Logo from "./components/Logo/Logo"
 function App() {
   return (
     <>
+    <Logo/>
     <Router>
       <Routes>
         <Route path = "/" element={<HomePage/>}/>

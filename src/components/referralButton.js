@@ -5,8 +5,7 @@ import { ethers } from "ethers";
 import booleanCheckValuesForReferralMint from "./resources/booleanCheckValuesForReferralMint";
 import { contractRead } from "./resources/ReadContract";
 import ErrorModal from "./ErrorModal/ErrorModal";
-import RedirectForm from "./RedirectForm/RedirectForm";
-import { Link } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 
 const ReferralButton = () => {
   const [boolValue, setBoolValue] = useState(false);
@@ -17,8 +16,9 @@ const ReferralButton = () => {
     contractRead.isReferralMintLive().then((res) => {
       setBoolValue(res);
     });
-  }, [loadingComp]);
+  }, [loadingComp ]);
 
+   const Navigate = useNavigate()
   const ButtonEnalbled = () => {
     return boolValue;
   };
@@ -57,9 +57,10 @@ const ReferralButton = () => {
     console.log("walletBalance: " + walletBalance);
     checkCorrectNetwork();
     let contractBalance =  await CheckReferralMint(walletAddress, walletBalance);
-
     console.log("minReferralMintPrice:"+ contractBalance._hex);
- 
+    if( booleanCheckValuesForReferralMint.walletBalanceCheck && booleanCheckValuesForReferralMint.hasMintedYetValue ) Navigate('/form')
+      
+   
     setLoadingComp(false);
   };
 
@@ -73,9 +74,10 @@ const ReferralButton = () => {
       setErrorModalValue(true);
       console.log("already minted");
     }
-    if (userBalance > contractBalance._hex) {
-
-      console.log(userBalance <= contractBalance._hex)
+    if (ethers.BigNumber.from(userBalance).lte(contractBalance)) {
+      console.log(userBalance <= contractBalance)
+      console.log(ethers.BigNumber.from(userBalance))
+      console.log(contractBalance._hex)
       booleanCheckValuesForReferralMint.walletBalanceCheck = false;
       setErrorModalValue(true);
       console.log("low balance");
@@ -141,11 +143,10 @@ const ReferralButton = () => {
       </h1>
       <h1>{loadingComp && "Loading..."}</h1>
           <span onClick={mintingProcess}>
-            <Link to = {booleanCheckValuesForReferralMint.walletBalanceCheck && booleanCheckValuesForReferralMint.hasMintedYetValue && !loadingComp ? "/form" : "/"} >
         <Button buttonText="Referral Mint"/>
-            </Link>
         </span>
-    </div>  );
+    </div>  
+    );
 };
 
 export default ReferralButton;

@@ -3,18 +3,20 @@ import DirectButton from '../components/PublicMint';
 import PriorityButton from '../components/priorityButton';
 import ReferralButton from '../components/referralButton';
 import '../App.css';
-import  Button  from "./Button/Button";
-import Faq from './Faq';
+import Faq from './Faq/Faq';
 
 const HomePage = () => {
   return (
       <>
-    <div className='flexBox'>
+    <div className='buttons'>
       <ReferralButton/>
       <DirectButton/>
       <PriorityButton/>
-        <Button/>
     </div>
+    <span className="flexBox">
+    <Faq/>
+
+    </span>
     </>
   )
 }
