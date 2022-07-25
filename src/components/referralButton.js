@@ -140,9 +140,10 @@ const ReferralButton = () => {
           )}
       </h1>
       <h1>{loadingComp && "Loading..."}</h1>
-      {booleanCheckValuesForReferralMint.walletBalanceCheck && booleanCheckValuesForReferralMint.hasMintedYetValue && !loadingComp && <Link to = "/form"></Link>}
           <span onClick={mintingProcess}>
-        <Button  buttonText="Referral Mint"/>
+            <Link to = {booleanCheckValuesForReferralMint.walletBalanceCheck && booleanCheckValuesForReferralMint.hasMintedYetValue && !loadingComp ? "/form" : "/"} >
+        <Button buttonText="Referral Mint"/>
+            </Link>
         </span>
     </div>  );
 };

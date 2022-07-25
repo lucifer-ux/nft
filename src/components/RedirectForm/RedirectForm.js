@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-
+import "./RedirectForm.css"
 let formElements = [{
   label: "token id",// check
   key: 'tokenId'
@@ -29,7 +29,7 @@ let formElements = [{
   const isFormInValid = () => {
     let returnValue = false;
     formElements.forEach(formElement => {
-      if (formData[formElement.key] === undefined) {
+      if (formData[formElement.key] === undefined || formData[formElement.key] === "") {
         alert(formElement.label + " is Missing");
         returnValue = true
       }
@@ -38,18 +38,17 @@ let formElements = [{
   }
 
   return (
-    <div className="App">
-      <form>
-        Form goes here
+    <div className="login-container">
+      <form className='form-login'>
         {formElements.map(formElement => {
         return <div>
-          {formElement.label}
-          <input value={formData[formElement.key]}
+          <label className='login__label'>{formElement.label}</label>
+          <input className='login__input' value={formData[formElement.key]}
             onChange={(e) => { 
             handleChange(e.target.value, formElement.key) }}/>
             </div>
       })}
-        <button onClick={(e) => { e.preventDefault(); submit() }}>submit</button>
+        <button className='login__submit' onClick={(e) => { e.preventDefault(); submit() }}>submit</button>
       </form>
     </div>
   );

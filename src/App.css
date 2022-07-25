@@ -4,9 +4,10 @@
 .flexBox{
   display: flex;
   flex-direction: row;
+  margin-top: 550px;
 }
 .flexBox > div{
-  margin: 50px;
+  margin: .5%;
 }
 .hidden{
   visibility: hidden;
