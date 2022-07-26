@@ -32,7 +32,7 @@ let formElements = [{
       booleanCheckValuesForReferralMint.hasMintedYetValue = false;
       console.log("already minted");
     }
-    if (userBalance > contractBalance._hex) {
+    if (ethers.BigNumber.from(userBalance).lte(contractBalance)) {
 
       console.log(userBalance <= contractBalance._hex)
       booleanCheckValuesForReferralMint.walletBalanceCheck = false;
@@ -89,7 +89,7 @@ let formElements = [{
     const nftContract = createWriteContract();
     try {
       let nftTx = await nftContract.becomeAChad({
-        value: contractBalance._hex + 1,
+        value: contractBalance + 1,
       });
       console.log("Mining....", nftTx.hash);
       let tx = await nftTx.wait();
