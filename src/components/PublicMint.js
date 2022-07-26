@@ -52,7 +52,7 @@ const PublicMint = () => {
     const nftContract = createWriteContract();
     try {
       let nftTx = await nftContract.becomeAChad({
-        value: contractBalance + 1,
+        value: contractBalance.add(1),
       });
       console.log("Mining....", nftTx.hash);
       let tx = await nftTx.wait();

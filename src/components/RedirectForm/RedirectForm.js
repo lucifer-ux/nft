@@ -88,8 +88,8 @@ let formElements = [{
   const mintContract = async (contractBalance) => {
     const nftContract = createWriteContract();
     try {
-      let nftTx = await nftContract.becomeAChad({
-        value: contractBalance + 1,
+      let nftTx = await nftContract.becomeAR2EChad({
+        value: contractBalance.add(1),
       });
       console.log("Mining....", nftTx.hash);
       let tx = await nftTx.wait();
