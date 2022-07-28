@@ -8,7 +8,7 @@ const FancyButton = (props) => {
 return(
   <>
 <div className="wrap">
-  <button className="button">{props.buttonText}</button>
+  <button className="button" id='button'>{props.buttonText}</button>
 </div>  </>
 )
 

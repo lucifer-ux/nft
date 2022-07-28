@@ -4,7 +4,9 @@ import "./Logo.css"
 const Logo = () => {
   return (
     <>
-    <img src={LogoImage} alt="Logo" />
+    <div className='wrap-image'>
+    <img src={LogoImage} alt="Logo" className='logo'/>
+    </div>
     </>
   )
 }

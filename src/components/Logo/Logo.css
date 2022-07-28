@@ -1,7 +1,39 @@
-img{
-    width: 100px; 
-    height: 100px; 
-    display: block; 
-    text-indent: -9999px;
-    cursor: pointer;
+.logo{
+  width: 100px; 
+  height: 100px; 
+  display: block; 
+  text-indent: -9999px;
+  cursor: pointer;
+
 }
+  
+  .wrap-image {
+    position: relative;
+    width: 100px;
+  }
+  .wrap-image::before, .wrap-image::after {
+    content: "";
+    width: 100px;
+    height: 100px;
+    position: absolute;
+    z-index: -1;
+    border: 2px solid yellow;
+    transition: all 0.25s ease-out;
+  }
+  .wrap-image::before {
+    background-color: yellow;
+    top: -15px;
+    left: -15px;
+  }
+  .wrap-image::after {
+    bottom: -15px;
+    right: -15px;
+  }
+  .wrap-image:hover::before {
+    top: 15px;
+    left: 15px;
+  }
+  .wrap-image:hover::after {
+    bottom: 15px;
+    right: 15px;
+  }

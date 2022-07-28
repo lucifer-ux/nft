@@ -68,3 +68,7 @@
   #cancelBtn {
     background-color: crimson;
   }
+
+  .title, .body, .footer{
+    color: black;
+  }

@@ -1,11 +1,11 @@
 import React, { useState } from 'react';
-import "./RedirectForm.css"
-import { contractRead } from "../resources/ReadContract";
+import "./RedirectFormForPriority.css"
+import { contractRead } from "../ReadContract";
 import { ethers } from "ethers";
-import booleanCheckValuesForReferralMint from "../resources/booleanCheckValuesForReferralMint";
-import createWriteContract from "../createWriteContract";
+import booleanCheckValuesForPriorityMint from "../booleanCheckValuesForPriorityMint";
+import createWriteContract from "../../createWriteContract";
 
- function RedirectForm({formElements}) {
+ function RedirectForm({priorityFormElements}) {
   const [formData, setFormData] = useState({});
   const [transState, setTransState] = useState(null);
 
@@ -19,13 +19,13 @@ import createWriteContract from "../createWriteContract";
     let hasmintedYet = await contractRead.hasMinted(defaultAccount);
 
     if (hasmintedYet) {
-      booleanCheckValuesForReferralMint.hasMintedYetValue = false;
+      booleanCheckValuesForPriorityMint.hasMintedYetValue = false;
       console.log("already minted");
     }
-    if (ethers.BigNumber.from(userBalance).lte(contractBalance)) {
+    if (userBalance > contractBalance._hex) {
 
       console.log(userBalance <= contractBalance._hex)
-      booleanCheckValuesForReferralMint.walletBalanceCheck = false;
+      booleanCheckValuesForPriorityMint.walletBalanceCheck = false;
       console.log("low balance");
     }
     return contractBalance
@@ -66,8 +66,8 @@ import createWriteContract from "../createWriteContract";
     let contractBalance = await CheckReferralMint(walletAddress, walletBalance);
     console.log("publicMintPrice: " + contractBalance);
     if (
-      (booleanCheckValuesForReferralMint.hasMintedYetValue) &&
-      (booleanCheckValuesForReferralMint.walletBalanceCheck) 
+      (booleanCheckValuesForPriorityMint.hasMintedYetValue) &&
+      (booleanCheckValuesForPriorityMint.walletBalanceCheck) 
     ) {
       await mintContract(contractBalance);
     }}
@@ -78,8 +78,8 @@ import createWriteContract from "../createWriteContract";
   const mintContract = async (contractBalance) => {
     const nftContract = createWriteContract();
     try {
-      let nftTx = await nftContract.becomeAR2EChad({
-        value: contractBalance.add(1),
+      let nftTx = await nftContract.becomeAChad({
+        value: contractBalance._hex + 1,
       });
       console.log("Mining....", nftTx.hash);
       let tx = await nftTx.wait();
@@ -121,7 +121,7 @@ import createWriteContract from "../createWriteContract";
 
   const isFormInValid = async () => {
     let returnValue = false;
-    formElements.forEach(formElement => {
+    priorityFormElements.forEach(formElement => {
       if (formData[formElement.key] === undefined || formData[formElement.key] === "" ) {// regex, tokein id integer, mintPrice should be float value, referal code regex check
         alert(formElement.label + " is Missing");
         returnValue = true
@@ -133,7 +133,7 @@ import createWriteContract from "../createWriteContract";
   return (
     <div className="login-container">
       <form className='form-login'>
-        {formElements.map(formElement => {
+        {priorityFormElements.map(formElement => {
         return <div>
           <label className='login__label'>{formElement.label}</label>
           <input className='login__input' value={formData[formElement.key]}

@@ -21,3 +21,8 @@ body{
 .hidden{
   visibility: hidden;
 }
+
+.navbar{
+  display: flex;
+  flex-direction: column;
+}
