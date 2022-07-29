@@ -1,19 +1,12 @@
-import React, { useEffect, useState } from 'react';
-import "./RedirectForm.css"
-import { contractRead } from "../resources/ReadContract";
+import React, { useState } from 'react';
+import { contractRead } from "../ReadContract";
 import { ethers } from "ethers";
-import booleanCheckValuesForReferralMint from "../resources/booleanCheckValuesForReferralMint";
-import createWriteContract from "../createWriteContract";
+import booleanCheckValuesForPriorityMint from "../booleanCheckValuesForPriorityMint";
+import createWriteContract from "../../createWriteContract";
 
-
-
-
- function RedirectForm({formElements}) {
+ function RedirectFormForGenerate({generateFormElements}) {
   const [formData, setFormData] = useState({});
   const [transState, setTransState] = useState(null);
-  useEffect (() =>{
-  
-  }, [])
 
   const handleChange = (value, key) => {
     setFormData({ ...formData, ...{ [key]: value } });
@@ -25,13 +18,13 @@ import createWriteContract from "../createWriteContract";
     let hasmintedYet = await contractRead.hasMinted(defaultAccount);
 
     if (hasmintedYet) {
-      booleanCheckValuesForReferralMint.hasMintedYetValue = false;
+      booleanCheckValuesForPriorityMint.hasMintedYetValue = false;
       console.log("already minted");
     }
     if (userBalance > contractBalance._hex) {
 
       console.log(userBalance <= contractBalance._hex)
-      booleanCheckValuesForReferralMint.walletBalanceCheck = false;
+      booleanCheckValuesForPriorityMint.walletBalanceCheck = false;
       console.log("low balance");
     }
     return contractBalance
@@ -62,7 +55,6 @@ import createWriteContract from "../createWriteContract";
   };
 
   const mintingProcess = async () => {
-    console.log(formData)
     if(!( await isFormInValid()))
     {let returnArray = await ConnectWalletHandler();
     let walletAddress = returnArray[0];
@@ -73,8 +65,8 @@ import createWriteContract from "../createWriteContract";
     let contractBalance = await CheckReferralMint(walletAddress, walletBalance);
     console.log("publicMintPrice: " + contractBalance);
     if (
-      (booleanCheckValuesForReferralMint.hasMintedYetValue) &&
-      (booleanCheckValuesForReferralMint.walletBalanceCheck) 
+      (booleanCheckValuesForPriorityMint.hasMintedYetValue) &&
+      (booleanCheckValuesForPriorityMint.walletBalanceCheck) 
     ) {
       await mintContract(contractBalance);
     }}
@@ -128,30 +120,23 @@ import createWriteContract from "../createWriteContract";
 
   const isFormInValid = async () => {
     let returnValue = false;
-    let key = "key"
-    formElements.forEach(formElement => {
+    generateFormElements.forEach(formElement => {
       if (formData[formElement.key] === undefined || formData[formElement.key] === "" ) {// regex, tokein id integer, mintPrice should be float value, referal code regex check
         alert(formElement.label + " is Missing");
         returnValue = true
       }
     })
-    const test = /^0x[a-f0-9]{130}$/.test(formData.referalCode);
-    if(!test) {alert("invalid referal code")
-  returnValue = true}
+    const test = /^0x[a-fA-F0-9]{40}$/.test(formData.walletAddress);
+    if(!test) {alert("invalid wallet address")
+  returnValue = true
+}
     return returnValue
   }
-const handleWalletAddress = async (referalCode) => {
-  console.log(referalCode)
-if(referalCode.match("^0x[a-fA-F0-9]{40}$"))
-return await true;
-else return await false;
-}
 
-  
   return (
     <div className="login-container">
       <form className='form-login'>
-        {formElements.map(formElement => {
+        {generateFormElements.map(formElement => {
         return <div>
           <label className='login__label'>{formElement.label}</label>
           <input className='login__input' value={formData[formElement.key]}
@@ -165,4 +150,4 @@ else return await false;
   );
 
 }
-export default RedirectForm
+export default RedirectFormForGenerate

@@ -6,6 +6,8 @@ import booleanCheckValuesForPriorityMint from "./resources/booleanCheckValuesFor
 import { contractRead } from "./resources/ReadContract";
 import ErrorModal from "./ErrorModal/ErrorModal";
 import { useNavigate } from "react-router-dom";
+import "../App.css"
+import CircleLoader from "react-spinners/CircleLoader";
 
 const PriorityButton = (props) => {
   const [boolValue, setBoolValue] = useState(false);
@@ -144,7 +146,7 @@ const PriorityButton = (props) => {
             />
           )}
       </h1>
-      <h1>{loadingComp && "Loading..."}</h1>
+      <CircleLoader color="#2C71C3" loading = {loadingComp} speedMultiplier = "3" id = "loader"/>
           <span onClick={mintingProcess}>
         <Button buttonText="Priority Mint"/>
         </span>

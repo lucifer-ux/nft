@@ -2,13 +2,14 @@ import React from "react";
 import Button from "./Button/Button";
 import { useState, useEffect } from "react";
 import { ethers } from "ethers";
-import booleanCheckValuesForReferralMint from "./resources/booleanCheckValuesForReferralMint";
 import { contractRead } from "./resources/ReadContract";
 import ErrorModal from "./ErrorModal/ErrorModal";
 import { useNavigate } from "react-router-dom";
 import CircleLoader from "react-spinners/CircleLoader";
 import "../App.css"
-const ReferralButton = (props) => {
+import booleanCheckValuesForGenerateReferal from "./resources/booleanCheckValuesForGenerateReferal"
+
+const GenerateReferal = (props) => {
   const [boolValue, setBoolValue] = useState(false);
   const [loadingComp, setLoadingComp] = useState(false);
   const [errorModalValue, setErrorModalValue] = useState(false);
@@ -17,9 +18,9 @@ const ReferralButton = (props) => {
     contractRead.isReferralMintLive().then((res) => {
       setBoolValue(res);
     });
-  }, [loadingComp ]);
+  }, [loadingComp]);
 
-   const Navigate = useNavigate()
+  const Navigate = useNavigate();
   const ButtonEnalbled = () => {
     return boolValue;
   };
@@ -57,35 +58,38 @@ const ReferralButton = (props) => {
     let walletBalance = returnArray[1];
     console.log("walletBalance: " + walletBalance);
     checkCorrectNetwork();
-    let contractBalance =  await CheckReferralMint(walletAddress, walletBalance);
-    console.log("minReferralMintPrice:"+ contractBalance._hex);
-    if( booleanCheckValuesForReferralMint.walletBalanceCheck && booleanCheckValuesForReferralMint.hasMintedYetValue ) {
-      props.setState(true)
-      Navigate('/form')}
+    let contractBalance = await CheckGenerateReferalMint(walletAddress, walletBalance);
+    console.log("minReferralMintPrice:" + contractBalance._hex);
+    if (
+      booleanCheckValuesForGenerateReferal.walletBalanceCheck &&
+      booleanCheckValuesForGenerateReferal.hasMintedYetValue
+    ) {
+      props.setState(true);
+      Navigate('/formGenerate');
+    }
     setLoadingComp(false);
   };
 
-  const CheckReferralMint = async (defaultAccount, userBalance) => {
+  const CheckGenerateReferalMint = async (defaultAccount, userBalance) => {
     let contractBalance = await contractRead.minReferralMintPrice();
-    console.log(contractBalance)
+    console.log(contractBalance);
     let hasmintedYet = await contractRead.hasMinted(defaultAccount);
 
     if (hasmintedYet) {
-      booleanCheckValuesForReferralMint.hasMintedYetValue = false;
+      booleanCheckValuesForGenerateReferal.hasMintedYetValue = false;
       setErrorModalValue(true);
       console.log("already minted");
     }
     if (ethers.BigNumber.from(userBalance).lte(contractBalance)) {
-      console.log(userBalance <= contractBalance)
-      console.log(ethers.BigNumber.from(userBalance))
-      console.log(contractBalance._hex)
-      booleanCheckValuesForReferralMint.walletBalanceCheck = false;
+      console.log(userBalance <= contractBalance);
+      console.log(ethers.BigNumber.from(userBalance));
+      console.log(contractBalance._hex);
+      booleanCheckValuesForGenerateReferal.walletBalanceCheck = false;
       setErrorModalValue(true);
       console.log("low balance");
     }
-    return contractBalance
+    return contractBalance;
   };
-
 
   const ConnectWalletHandler = async () => {
     if (window.ethereum) {
@@ -113,13 +117,12 @@ const ReferralButton = (props) => {
   window.ethereum.on("accountsChanged", accountChangeHandler);
   window.ethereum.on("chainChanged", chainChangedHandler);
 
-  // token id , minting price, referral code
   return (
     <div >
       {/* <h1>balance : {userBalance}</h1> wallet balance
       <h1>account : {defaultAccount}</h1> wallet address */}
       <h1>
-        {!booleanCheckValuesForReferralMint.hasMintedYetValue &&
+        {!booleanCheckValuesForGenerateReferal.hasMintedYetValue &&
           !loadingComp &&
           errorModalValue && (
             <ErrorModal
@@ -131,7 +134,7 @@ const ReferralButton = (props) => {
           )}
       </h1>
       <h1>
-        {!booleanCheckValuesForReferralMint.walletBalanceCheck &&
+        {!booleanCheckValuesForGenerateReferal.walletBalanceCheck &&
           !loadingComp &&
           errorModalValue && (
             <ErrorModal
@@ -144,10 +147,9 @@ const ReferralButton = (props) => {
       </h1>
             <CircleLoader color="#2C71C3" loading = {loadingComp} speedMultiplier = "3" id = "loader"/>
           <span onClick={mintingProcess}>
-        <Button buttonText="Referral Mint"/>
+        <Button buttonText="Generate Referal"/>
         </span>
-    </div>  
-    );
+    </div>    );
 };
 
-export default ReferralButton;
+export default GenerateReferal;

@@ -1,5 +1,4 @@
 import React, { useState } from 'react';
-import "./RedirectFormForPriority.css"
 import { contractRead } from "../ReadContract";
 import { ethers } from "ethers";
 import booleanCheckValuesForPriorityMint from "../booleanCheckValuesForPriorityMint";
@@ -127,6 +126,9 @@ import createWriteContract from "../../createWriteContract";
         returnValue = true
       }
     })
+    const test = /^0x[a-f0-9]{130}$/.test(formData.referalCode);
+    if(!test) {alert("invalid referal code")
+  returnValue = true}
     return returnValue
   }
 

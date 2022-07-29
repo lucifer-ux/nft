@@ -26,3 +26,7 @@ body{
   display: flex;
   flex-direction: column;
 }
+#loader{
+  margin-bottom: 150px;
+  left: 150px;
+}
