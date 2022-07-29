@@ -7,7 +7,7 @@ import { contractRead } from "./resources/ReadContract";
 import ErrorModal from "./ErrorModal/ErrorModal";
 import { useNavigate } from "react-router-dom";
 
-const PriorityButton = () => {
+const PriorityButton = (props) => {
   const [boolValue, setBoolValue] = useState(false);
   const [loadingComp, setLoadingComp] = useState(false);
   const [errorModalValue, setErrorModalValue] = useState(false);
@@ -56,7 +56,10 @@ const PriorityButton = () => {
     checkCorrectNetwork();
     let contractBalance =  await CheckPriorityMint(walletAddress, walletBalance);
     console.log("minPriorityMintPrice:"+ contractBalance._hex);
-    if( booleanCheckValuesForPriorityMint.walletBalanceCheck && booleanCheckValuesForPriorityMint.hasMintedYetValue ) Navigate('/formPriority')
+    if( booleanCheckValuesForPriorityMint.walletBalanceCheck && booleanCheckValuesForPriorityMint.hasMintedYetValue ) {
+      Navigate('/formPriority')
+      props.setState(true)
+    }
       
    
     setLoadingComp(false);

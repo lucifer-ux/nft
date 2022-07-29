@@ -7,7 +7,7 @@ import Faq from './Faq/Faq';
 import Logo from './Logo/Logo';
 import Banner from './Banner/Banner';
 
-const HomePage = () => {
+const HomePage = (props) => {
   return (
       <>
     <div className='navbar'>
@@ -15,9 +15,9 @@ const HomePage = () => {
     <Banner/>
     </div>
     <div className='buttons'>
-      <ReferralButton/>
+      <ReferralButton setState = {props.setState}/>
       <DirectButton/>
-      <PriorityButton/>
+      <PriorityButton setState = {props.setState}/>
     </div>
     <span className="flexBox">
     <Faq/>

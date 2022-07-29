@@ -1,13 +1,19 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import "./RedirectForm.css"
 import { contractRead } from "../resources/ReadContract";
 import { ethers } from "ethers";
 import booleanCheckValuesForReferralMint from "../resources/booleanCheckValuesForReferralMint";
 import createWriteContract from "../createWriteContract";
 
+
+
+
  function RedirectForm({formElements}) {
   const [formData, setFormData] = useState({});
   const [transState, setTransState] = useState(null);
+  useEffect (() =>{
+  
+  }, [])
 
   const handleChange = (value, key) => {
     setFormData({ ...formData, ...{ [key]: value } });
