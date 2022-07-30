@@ -11,18 +11,21 @@ import GenerateReferal from './GenerateReferal';
 const HomePage = (props) => {
   return (
       <>
+      <div className="bg"></div>
+<div className="bg bg2"></div>
+<div className="bg bg3"></div>  
     <div className='navbar'>
-    <Logo/>
-    <Banner/>
+    <Logo className= "content"/>
+    <Banner className = "content"/>
     </div>
     <div className='buttons'>
-      <ReferralButton setState = {props.setState}/>
-      <DirectButton/>
-      <PriorityButton setState = {props.setState}/>
-      <GenerateReferal setState = {props.setState}/>
+      <ReferralButton className="content" setState = {props.setState}/>
+      <DirectButton className="content"/>
+      <PriorityButton className="content" setState = {props.setState}/>
+      <GenerateReferal className="content" setState = {props.setState}/>
     </div>
     <span className="flexBox">
-    <Faq/>
+    <Faq className="content"/>
 
     </span>
     </>

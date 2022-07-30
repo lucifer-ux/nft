@@ -4,4 +4,8 @@
     top: 0;
     position: absolute;
     right: 100px;
+    transition: all 1s ease-in 0s;
+}
+.bannerImage:hover {
+    width: 1000px;
 }
