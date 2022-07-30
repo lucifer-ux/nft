@@ -142,7 +142,7 @@ const ReferralButton = (props) => {
             />
           )}
       </h1>
-            <CircleLoader color="#2C71C3" loading = {loadingComp} speedMultiplier = "3" id = "loader"/>
+            <CircleLoader color="#CCD5E0" loading = {loadingComp} speedMultiplier = "3" id = "loader"/>
           <span onClick={mintingProcess}>
         <Button buttonText="Referral Mint"/>
         </span>

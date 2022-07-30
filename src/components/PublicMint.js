@@ -169,7 +169,7 @@ const PublicMint = () => {
               link = ""
             />
           )}
-            <CircleLoader color="#2C71C3" loading = {loadingComp} speedMultiplier = "3" id = "loader"/>
+            <CircleLoader color="#CCD5E0" loading = {loadingComp} speedMultiplier = "3" id = "loader"/>
       <div onClick={mintingProcess}>
         <Button  buttonText="Public Mint" />
       </div>
