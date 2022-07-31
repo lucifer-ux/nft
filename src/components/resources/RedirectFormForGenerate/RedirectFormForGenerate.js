@@ -4,7 +4,7 @@ import { ethers } from "ethers";
 import booleanCheckValuesForPriorityMint from "../booleanCheckValuesForPriorityMint";
 import createWriteContract from "../../createWriteContract";
 
- function RedirectForm({priorityFormElements}) {
+ function RedirectFormForGenerate({generateFormElements}) {
   const [formData, setFormData] = useState({});
   const [transState, setTransState] = useState(null);
 
@@ -120,22 +120,23 @@ import createWriteContract from "../../createWriteContract";
 
   const isFormInValid = async () => {
     let returnValue = false;
-    priorityFormElements.forEach(formElement => {
+    generateFormElements.forEach(formElement => {
       if (formData[formElement.key] === undefined || formData[formElement.key] === "" ) {// regex, tokein id integer, mintPrice should be float value, referal code regex check
         alert(formElement.label + " is Missing");
         returnValue = true
       }
     })
-    const test = /^0x[a-f0-9]{130}$/.test(formData.referalCode);
-    if(!test) {alert("invalid referal code")
-  returnValue = true}
+    const test = /^0x[a-fA-F0-9]{40}$/.test(formData.walletAddress);
+    if(!test) {alert("invalid wallet address")
+  returnValue = true
+}
     return returnValue
   }
 
   return (
     <div className="login-container">
       <form className='form-login'>
-        {priorityFormElements.map(formElement => {
+        {generateFormElements.map(formElement => {
         return <div>
           <label className='login__label'>{formElement.label}</label>
           <input className='login__input' value={formData[formElement.key]}
@@ -149,4 +150,4 @@ import createWriteContract from "../../createWriteContract";
   );
 
 }
-export default RedirectForm
+export default RedirectFormForGenerate

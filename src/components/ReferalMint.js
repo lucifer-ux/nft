@@ -6,8 +6,9 @@ import booleanCheckValuesForReferralMint from "./resources/booleanCheckValuesFor
 import { contractRead } from "./resources/ReadContract";
 import ErrorModal from "./ErrorModal/ErrorModal";
 import { useNavigate } from "react-router-dom";
-
-const ReferralButton = () => {
+import CircleLoader from "react-spinners/CircleLoader";
+import "../App.css"
+const ReferralButton = (props) => {
   const [boolValue, setBoolValue] = useState(false);
   const [loadingComp, setLoadingComp] = useState(false);
   const [errorModalValue, setErrorModalValue] = useState(false);
@@ -58,9 +59,9 @@ const ReferralButton = () => {
     checkCorrectNetwork();
     let contractBalance =  await CheckReferralMint(walletAddress, walletBalance);
     console.log("minReferralMintPrice:"+ contractBalance._hex);
-    if( booleanCheckValuesForReferralMint.walletBalanceCheck && booleanCheckValuesForReferralMint.hasMintedYetValue ) Navigate('/form')
-      
-   
+    if( booleanCheckValuesForReferralMint.walletBalanceCheck && booleanCheckValuesForReferralMint.hasMintedYetValue ) {
+      props.setState(true)
+      Navigate('/form')}
     setLoadingComp(false);
   };
 
@@ -141,7 +142,7 @@ const ReferralButton = () => {
             />
           )}
       </h1>
-      <h1>{loadingComp && "Loading..."}</h1>
+            <CircleLoader color="#CCD5E0" loading = {loadingComp} speedMultiplier = "3" id = "loader"/>
           <span onClick={mintingProcess}>
         <Button buttonText="Referral Mint"/>
         </span>

@@ -2,10 +2,14 @@
     width: 100vw;
     height: 100vw;
     background-color: #6699cc;
-    position: relative;
     display: flex;
     justify-content: center;
     align-items: center;
+    z-index: 2;
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
   }
   
   .modalContainer {
@@ -17,6 +21,11 @@
     display: flex;
     flex-direction: column;
     padding: 25px;
+    z-index: 3;
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
   }
   
   .modalContainer .title {

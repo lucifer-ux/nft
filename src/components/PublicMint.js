@@ -7,6 +7,7 @@ import { useEffect } from "react";
 import booleanCheckValues from "./resources/booleanCheckValuesPublicMint";
 import createWriteContract from "./createWriteContract";
 import ErrorModal from "./ErrorModal/ErrorModal";
+import CircleLoader from "react-spinners/CircleLoader";
 import "../App.css"
 const PublicMint = () => {
   const [boolValue, setBoolValue] = useState(false);
@@ -168,7 +169,7 @@ const PublicMint = () => {
               link = ""
             />
           )}
-      <h1>{loadingComp && "Loading..."}</h1>
+            <CircleLoader color="#CCD5E0" loading = {loadingComp} speedMultiplier = "3" id = "loader"/>
       <div onClick={mintingProcess}>
         <Button  buttonText="Public Mint" />
       </div>

@@ -6,21 +6,26 @@ import '../App.css';
 import Faq from './Faq/Faq';
 import Logo from './Logo/Logo';
 import Banner from './Banner/Banner';
+import GenerateReferal from './GenerateReferal';
 
-const HomePage = () => {
+const HomePage = (props) => {
   return (
       <>
+      <div className="bg"></div>
+<div className="bg bg2"></div>
+<div className="bg bg3"></div>  
     <div className='navbar'>
-    <Logo/>
-    <Banner/>
+    <Logo className= "content"/>
+    <Banner className = "content"/>
     </div>
     <div className='buttons'>
-      <ReferralButton/>
-      <DirectButton/>
-      <PriorityButton/>
+      <ReferralButton className="content" setState = {props.setState}/>
+      <DirectButton className="content"/>
+      <PriorityButton className="content" setState = {props.setState}/>
+      <GenerateReferal className="content" setState = {props.setState}/>
     </div>
     <span className="flexBox">
-    <Faq/>
+    <Faq className="content"/>
 
     </span>
     </>

@@ -4,12 +4,14 @@
   display: block; 
   text-indent: -9999px;
   cursor: pointer;
-
+  margin-left: 50px;
 }
   
   .wrap-image {
     position: relative;
     width: 100px;
+    margin-left: 50px;
+
   }
   .wrap-image::before, .wrap-image::after {
     content: "";
@@ -17,23 +19,31 @@
     height: 100px;
     position: absolute;
     z-index: -1;
-    border: 2px solid yellow;
+    border: 2px solid rgb(0, 140, 255);
     transition: all 0.25s ease-out;
+    margin-left: 50px;
   }
   .wrap-image::before {
-    background-color: yellow;
+    background-color: rgb(0, 140, 255);
     top: -15px;
     left: -15px;
+    margin-left: 50px;
   }
   .wrap-image::after {
     bottom: -15px;
     right: -15px;
+    margin-left: 50px;
+
   }
   .wrap-image:hover::before {
     top: 15px;
     left: 15px;
+    margin-left: 50px;
+
   }
   .wrap-image:hover::after {
     bottom: 15px;
     right: 15px;
+    margin-left: 50px;
+
   }
