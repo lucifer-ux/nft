@@ -32,10 +32,11 @@ import {generateReferralCode} from "./generateCode"
     console.log(ownedPrivilegedTokenIDs[0])
     let ifRightTokenEntered = ownedPrivilegedTokenIDs.includes(parseInt(formData.tokenId))
     let MintingPriceLessThanMinReferralMintPrice = ethers.utils.parseEther(formData.mintingPrice).lt(minReferralMintPrice)
+    let AddressHasMinted = await contractRead.hasMinted(formData.walletAddress)
 
 
 
-    if (ownedPrivilegedTokenIDs.length == 0) {
+    if (ownedPrivilegedTokenIDs.length === 0) {
       console.log("You Don't Hold Elite NFT");
       alert("You Dont Hold Elite NFT")
     }
@@ -50,7 +51,12 @@ import {generateReferralCode} from "./generateCode"
       console.log("This is not an owned Elite NFT")
       alert("This is not an owned Elite NFT")
     }
-    return (ownedPrivilegedTokenIDs.length > 0) && ifRightTokenEntered && (!MintingPriceLessThanMinReferralMintPrice);
+
+    if(AddressHasMinted) {
+      console.log("This address has already minted")
+      alert("This address has already minted")
+    }
+    return (ownedPrivilegedTokenIDs.length > 0) && ifRightTokenEntered && (!MintingPriceLessThanMinReferralMintPrice) && (!AddressHasMinted);
   };
 
 
@@ -66,7 +72,7 @@ import {generateReferralCode} from "./generateCode"
     if (
       checkReturnValue
     ) {
-      alert((await generateReferralCode(walletAddress, formData.mintingPrice, parseInt(formData.tokenId))).signature);
+      alert((await generateReferralCode(formData.walletAddress, formData.mintingPrice, parseInt(formData.tokenId))).signature);
     }}
     else {console.log("error bro")}
   };

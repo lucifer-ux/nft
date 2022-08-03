@@ -62,7 +62,7 @@ await CheckGenerateReferalMint(walletAddress, walletBalance);
 
 
 
-    if (ownedPrivilegedTokenIDs.length == 0) {
+    if (ownedPrivilegedTokenIDs.length === 0) {
       booleanCheckValuesForGenerateReferal.isPrivilegedTokenHolder = false;
       setErrorModalValue(true);
       console.log("You Don't Hold Privileged Tokens");
