@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
 import { contractRead } from "../ReadContract";
 import { ethers } from "ethers";
-import booleanCheckValuesForPriorityMint from "../booleanCheckValuesForPriorityMint";
 import createWriteContract from "../../createWriteContract";
+import {checkCorrectNetwork, ConnectWalletHandler, accountChangeHandler, chainChangedHandler} from "../../utilities/contract"
+import {generateReferralCode} from "./generateCode"
 
  function RedirectFormForGenerate({generateFormElements}) {
   const [formData, setFormData] = useState({});
@@ -11,48 +12,47 @@ import createWriteContract from "../../createWriteContract";
   const handleChange = (value, key) => {
     setFormData({ ...formData, ...{ [key]: value } });
   }
-
-  const CheckReferralMint = async (defaultAccount, userBalance) => {
-    let contractBalance = await contractRead.minReferralMintPrice();
-    console.log(contractBalance)
-    let hasmintedYet = await contractRead.hasMinted(defaultAccount);
-
-    if (hasmintedYet) {
-      booleanCheckValuesForPriorityMint.hasMintedYetValue = false;
-      console.log("already minted");
-    }
-    if (userBalance > contractBalance._hex) {
-
-      console.log(userBalance <= contractBalance._hex)
-      booleanCheckValuesForPriorityMint.walletBalanceCheck = false;
-      console.log("low balance");
-    }
-    return contractBalance
-  };
-  const checkCorrectNetwork = async () => {
-    if (window.ethereum.networkVersion !== 4) {
-      try {
-        await window.ethereum.request({
-          method: "wallet_switchEthereumChain",
-          params: [{ chainId: ethers.utils.hexValue(4) }],
-        });
-      } catch (err) {
-        if (err.code === 4902) {
-          await window.ethereum.request({
-            method: "wallet_addEthereumChain",
-            params: [
-              {
-                chainName: "Rinkeby Mainnet",
-                chainId: ethers.utils.hexValue(4),
-                nativeCurrency: { name: "ETH", decimals: 18, symbol: "ETH" },
-                rpcUrls: ["https://rinkeby.infura.io/v3/"],
-              },
-            ],
-          });
-        }
+  // get Privileged tokens
+  const getPrivilegedTokens = async (defaultAccount) => {
+    let privilegedTokens = []
+    let ownedTokenIDs = await contractRead.tokensOf(defaultAccount);
+    console.log(ownedTokenIDs)
+    for(let i = 0; i<ownedTokenIDs.length; i++){
+      if(await contractRead.isTokenPrivileged(ownedTokenIDs[i])){
+        privilegedTokens.push(ownedTokenIDs[i].toNumber());
       }
     }
+    return privilegedTokens;
+  }
+
+  const CheckGenerateReferalMint = async (defaultAccount, userBalance) => {
+    let ownedPrivilegedTokenIDs = await getPrivilegedTokens(defaultAccount)
+    let minReferralMintPrice = await contractRead.minReferralMintPrice();
+    console.log("minReferralPrice: " + minReferralMintPrice);
+    console.log(ownedPrivilegedTokenIDs[0])
+    let ifRightTokenEntered = ownedPrivilegedTokenIDs.includes(parseInt(formData.tokenId))
+    let MintingPriceLessThanMinReferralMintPrice = ethers.utils.parseEther(formData.mintingPrice).lt(minReferralMintPrice)
+
+
+
+    if (ownedPrivilegedTokenIDs.length == 0) {
+      console.log("You Don't Hold Elite NFT");
+      alert("You Dont Hold Elite NFT")
+    }
+
+    if (MintingPriceLessThanMinReferralMintPrice) {
+
+      console.log("low minting price");
+      alert("low minting price")
+    }
+
+    if(!ifRightTokenEntered) {
+      console.log("This is not an owned Elite NFT")
+      alert("This is not an owned Elite NFT")
+    }
+    return (ownedPrivilegedTokenIDs.length > 0) && ifRightTokenEntered && (!MintingPriceLessThanMinReferralMintPrice);
   };
+
 
   const mintingProcess = async () => {
     if(!( await isFormInValid()))
@@ -62,59 +62,15 @@ import createWriteContract from "../../createWriteContract";
     let walletBalance = returnArray[1];
     console.log("walletBalance: " + walletBalance);
     checkCorrectNetwork();
-    let contractBalance = await CheckReferralMint(walletAddress, walletBalance);
-    console.log("publicMintPrice: " + contractBalance);
+    let checkReturnValue = await CheckGenerateReferalMint(walletAddress, walletBalance);
     if (
-      (booleanCheckValuesForPriorityMint.hasMintedYetValue) &&
-      (booleanCheckValuesForPriorityMint.walletBalanceCheck) 
+      checkReturnValue
     ) {
-      await mintContract(contractBalance);
+      alert((await generateReferralCode(walletAddress, formData.mintingPrice, parseInt(formData.tokenId))).signature);
     }}
     else {console.log("error bro")}
   };
 
-
-  const mintContract = async (contractBalance) => {
-    const nftContract = createWriteContract();
-    try {
-      let nftTx = await nftContract.becomeAChad({
-        value: contractBalance._hex + 1,
-      });
-      console.log("Mining....", nftTx.hash);
-      let tx = await nftTx.wait();
-      console.log("Mined!", tx);
-      setTransState(
-        `Mined, see transaction: https://rinkeby.etherscan.io/tx/${nftTx.hash}`
-      );
-    } catch (error) {
-      console.log("Error minting", error);
-      setTransState(error.message);
-    }
-  };
-
-  const ConnectWalletHandler = async () => {
-    if (window.ethereum) {
-      let addresses = await window.ethereum.request({
-        method: "eth_requestAccounts",
-      });
-      let userBalance = await accountChangeHandler(addresses[0]);
-      return [addresses[0], userBalance];
-    }
-  };
-
-  const accountChangeHandler = async (newAccount) => {
-    let userBalance = await getUserBalance(newAccount);
-    return userBalance;
-  };
-  const getUserBalance = async (address) => {
-    return await window.ethereum.request({
-      method: "eth_getBalance",
-      params: [address, "latest"],
-    });
-  };
-  const chainChangedHandler = () => {
-    window.location.reload();
-  };
   window.ethereum.on("accountsChanged", accountChangeHandler);
   window.ethereum.on("chainChanged", chainChangedHandler);
 
@@ -127,9 +83,19 @@ import createWriteContract from "../../createWriteContract";
       }
     })
     const test = /^0x[a-fA-F0-9]{40}$/.test(formData.walletAddress);
-    if(!test) {alert("invalid wallet address")
-  returnValue = true
-}
+    if(!test) { 
+      alert("invalid wallet address")
+      returnValue = true
+    }
+    if (!Number.isInteger(parseInt(formData.tokenId))) {
+      alert("tokenId should be Integer");
+      returnValue = true;
+    }
+    if(Number.isNaN(parseFloat(formData.mintingPrice))) {
+      
+      alert("minting Price should be in float")
+      returnValue = true;
+    }
     return returnValue
   }
 

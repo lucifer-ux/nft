@@ -2,7 +2,7 @@ const formElements = [{
     label: "token id",// check
     key: 'tokenId'
   }, {
-    label: "minting price",// minbalance above check
+    label: "minting price (In ETH)",// minbalance above check
     key: 'mintingPrice'
   }, {
     label: "referral code",

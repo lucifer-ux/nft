@@ -8,6 +8,7 @@ import { useNavigate } from "react-router-dom";
 import CircleLoader from "react-spinners/CircleLoader";
 import "../App.css"
 import booleanCheckValuesForGenerateReferal from "./resources/booleanCheckValuesForGenerateReferal"
+import {checkCorrectNetwork, ConnectWalletHandler, accountChangeHandler, chainChangedHandler} from "./utilities/contract"
 
 const GenerateReferal = (props) => {
   const [boolValue, setBoolValue] = useState(false);
@@ -25,31 +26,6 @@ const GenerateReferal = (props) => {
     return boolValue;
   };
 
-  const checkCorrectNetwork = async () => {
-    if (window.ethereum.networkVersion !== 4) {
-      try {
-        await window.ethereum.request({
-          method: "wallet_switchEthereumChain",
-          params: [{ chainId: ethers.utils.hexValue(4) }],
-        });
-      } catch (err) {
-        if (err.code === 4902) {
-          await window.ethereum.request({
-            method: "wallet_addEthereumChain",
-            params: [
-              {
-                chainName: "Rinkeby Mainnet",
-                chainId: ethers.utils.hexValue(4),
-                nativeCurrency: { name: "ETH", decimals: 18, symbol: "ETH" },
-                rpcUrls: ["https://rinkeby.infura.io/v3/"],
-              },
-            ],
-          });
-        }
-      }
-    }
-  };
-
   const mintingProcess = async () => {
     setLoadingComp(true);
     let returnArray = await ConnectWalletHandler();
@@ -58,11 +34,9 @@ const GenerateReferal = (props) => {
     let walletBalance = returnArray[1];
     console.log("walletBalance: " + walletBalance);
     checkCorrectNetwork();
-    let contractBalance = await CheckGenerateReferalMint(walletAddress, walletBalance);
-    console.log("minReferralMintPrice:" + contractBalance._hex);
+await CheckGenerateReferalMint(walletAddress, walletBalance);
     if (
-      booleanCheckValuesForGenerateReferal.walletBalanceCheck &&
-      booleanCheckValuesForGenerateReferal.hasMintedYetValue
+      booleanCheckValuesForGenerateReferal.isPrivilegedTokenHolder
     ) {
       props.setState(true);
       Navigate('/formGenerate');
@@ -70,50 +44,31 @@ const GenerateReferal = (props) => {
     setLoadingComp(false);
   };
 
+  // get Privileged tokens
+  const getPrivilegedTokens = async (defaultAccount) => {
+    let privilegedTokens = []
+    let ownedTokenIDs = await contractRead.tokensOf(defaultAccount);
+    console.log(ownedTokenIDs)
+    for(let i = 0; i<ownedTokenIDs.length; i++){
+      if(await contractRead.isTokenPrivileged(ownedTokenIDs[i])){
+        privilegedTokens.push(ownedTokenIDs[i].toNumber());
+      }
+    }
+    return privilegedTokens;
+  }
+
   const CheckGenerateReferalMint = async (defaultAccount, userBalance) => {
-    let contractBalance = await contractRead.minReferralMintPrice();
-    console.log(contractBalance);
-    let hasmintedYet = await contractRead.hasMinted(defaultAccount);
+    let ownedPrivilegedTokenIDs = await getPrivilegedTokens(defaultAccount)
 
-    if (hasmintedYet) {
-      booleanCheckValuesForGenerateReferal.hasMintedYetValue = false;
+
+
+    if (ownedPrivilegedTokenIDs.length == 0) {
+      booleanCheckValuesForGenerateReferal.isPrivilegedTokenHolder = false;
       setErrorModalValue(true);
-      console.log("already minted");
-    }
-    if (ethers.BigNumber.from(userBalance).lte(contractBalance)) {
-      console.log(userBalance <= contractBalance);
-      console.log(ethers.BigNumber.from(userBalance));
-      console.log(contractBalance._hex);
-      booleanCheckValuesForGenerateReferal.walletBalanceCheck = false;
-      setErrorModalValue(true);
-      console.log("low balance");
-    }
-    return contractBalance;
-  };
-
-  const ConnectWalletHandler = async () => {
-    if (window.ethereum) {
-      let addresses = await window.ethereum.request({
-        method: "eth_requestAccounts",
-      });
-      let userBalance = await accountChangeHandler(addresses[0]);
-      return [addresses[0], userBalance];
+      console.log("You Don't Hold Privileged Tokens");
     }
   };
 
-  const accountChangeHandler = async (newAccount) => {
-    let userBalance = await getUserBalance(newAccount);
-    return userBalance;
-  };
-  const getUserBalance = async (address) => {
-    return await window.ethereum.request({
-      method: "eth_getBalance",
-      params: [address, "latest"],
-    });
-  };
-  const chainChangedHandler = () => {
-    window.location.reload();
-  };
   window.ethereum.on("accountsChanged", accountChangeHandler);
   window.ethereum.on("chainChanged", chainChangedHandler);
 
@@ -122,24 +77,12 @@ const GenerateReferal = (props) => {
       {/* <h1>balance : {userBalance}</h1> wallet balance
       <h1>account : {defaultAccount}</h1> wallet address */}
       <h1>
-        {!booleanCheckValuesForGenerateReferal.hasMintedYetValue &&
+        {!booleanCheckValuesForGenerateReferal.isPrivilegedTokenHolder &&
           !loadingComp &&
           errorModalValue && (
             <ErrorModal
-              text="Aleready minted!!"
-              body="You can mint only once"
-              buttonText="Go back"
-              setErrorModalValue={setErrorModalValue}
-            />
-          )}
-      </h1>
-      <h1>
-        {!booleanCheckValuesForGenerateReferal.walletBalanceCheck &&
-          !loadingComp &&
-          errorModalValue && (
-            <ErrorModal
-              text="Low Wallet Balance!!"
-              body="You dont have what it takes to become a chad"
+              text="No Elite NFTs Found!!"
+              body="You dont have any elite Chads"
               buttonText="Go back"
               setErrorModalValue={setErrorModalValue}
             />

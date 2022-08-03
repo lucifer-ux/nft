@@ -9,6 +9,7 @@ import createWriteContract from "./createWriteContract";
 import ErrorModal from "./ErrorModal/ErrorModal";
 import CircleLoader from "react-spinners/CircleLoader";
 import "../App.css"
+import {checkCorrectNetwork, ConnectWalletHandler, accountChangeHandler, chainChangedHandler} from "./utilities/contract"
 const PublicMint = () => {
   const [boolValue, setBoolValue] = useState(false);
   const [loadingComp, setLoadingComp] = useState(false);
@@ -25,30 +26,6 @@ const PublicMint = () => {
     return boolValue;
   };
 
-  const checkCorrectNetwork = async () => {
-    if (window.ethereum.networkVersion !== 4) {
-      try {
-        await window.ethereum.request({
-          method: "wallet_switchEthereumChain",
-          params: [{ chainId: ethers.utils.hexValue(4) }],
-        });
-      } catch (err) {
-        if (err.code === 4902) {
-          await window.ethereum.request({
-            method: "wallet_addEthereumChain",
-            params: [
-              {
-                chainName: "Rinkeby Mainnet",
-                chainId: ethers.utils.hexValue(4),
-                nativeCurrency: { name: "ETH", decimals: 18, symbol: "ETH" },
-                rpcUrls: ["https://rinkeby.infura.io/v3/"],
-              },
-            ],
-          });
-        }
-      }
-    }
-  };
   const mintContract = async (contractBalance) => {
     const nftContract = createWriteContract();
     try {
@@ -106,29 +83,6 @@ const PublicMint = () => {
     return contractBalance;
   };
 
-  const ConnectWalletHandler = async () => {
-    if (window.ethereum) {
-      let addresses = await window.ethereum.request({
-        method: "eth_requestAccounts",
-      });
-      let userBalance = await accountChangeHandler(addresses[0]);
-      return [addresses[0], userBalance];
-    }
-  };
-
-  const accountChangeHandler = async (newAccount) => {
-    let userBalance = await getUserBalance(newAccount);
-    return userBalance;
-  };
-  const getUserBalance = async (address) => {
-    return await window.ethereum.request({
-      method: "eth_getBalance",
-      params: [address, "latest"],
-    });
-  };
-  const chainChangedHandler = () => {
-    window.location.reload();
-  };
   window.ethereum.on("accountsChanged", accountChangeHandler);
   window.ethereum.on("chainChanged", chainChangedHandler);
 

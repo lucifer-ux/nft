@@ -1,5 +1,4 @@
 import { ethers } from "ethers";
-
 import abi from './resources/abi'
     const createWriteContract = () => {
 		try {
@@ -9,7 +8,7 @@ import abi from './resources/abi'
 				const provider = new ethers.providers.Web3Provider(ethereum);
 				const signer = provider.getSigner()
 				const nftContract = new ethers.Contract(
-					"0xa92519004d38eD74A96E841f17bc7e6B3E372B11",
+					process.env.REACT_APP_CONTRACT_ADDRESS,
 					abi,
 					signer
 				)

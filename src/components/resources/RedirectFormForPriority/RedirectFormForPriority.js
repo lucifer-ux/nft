@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
 import { contractRead } from "../ReadContract";
 import { ethers } from "ethers";
-import booleanCheckValuesForPriorityMint from "../booleanCheckValuesForPriorityMint";
 import createWriteContract from "../../createWriteContract";
+import {checkCorrectNetwork, ConnectWalletHandler, accountChangeHandler, chainChangedHandler} from "../../utilities/contract"
 
  function RedirectForm({priorityFormElements}) {
   const [formData, setFormData] = useState({});
@@ -13,45 +13,14 @@ import createWriteContract from "../../createWriteContract";
   }
 
   const CheckReferralMint = async (defaultAccount, userBalance) => {
-    let contractBalance = await contractRead.minReferralMintPrice();
-    console.log(contractBalance)
     let hasmintedYet = await contractRead.hasMinted(defaultAccount);
 
     if (hasmintedYet) {
-      booleanCheckValuesForPriorityMint.hasMintedYetValue = false;
       console.log("already minted");
+      alert("already minted")
     }
-    if (userBalance > contractBalance._hex) {
 
-      console.log(userBalance <= contractBalance._hex)
-      booleanCheckValuesForPriorityMint.walletBalanceCheck = false;
-      console.log("low balance");
-    }
-    return contractBalance
-  };
-  const checkCorrectNetwork = async () => {
-    if (window.ethereum.networkVersion !== 4) {
-      try {
-        await window.ethereum.request({
-          method: "wallet_switchEthereumChain",
-          params: [{ chainId: ethers.utils.hexValue(4) }],
-        });
-      } catch (err) {
-        if (err.code === 4902) {
-          await window.ethereum.request({
-            method: "wallet_addEthereumChain",
-            params: [
-              {
-                chainName: "Rinkeby Mainnet",
-                chainId: ethers.utils.hexValue(4),
-                nativeCurrency: { name: "ETH", decimals: 18, symbol: "ETH" },
-                rpcUrls: ["https://rinkeby.infura.io/v3/"],
-              },
-            ],
-          });
-        }
-      }
-    }
+    return !hasmintedYet
   };
 
   const mintingProcess = async () => {
@@ -62,13 +31,11 @@ import createWriteContract from "../../createWriteContract";
     let walletBalance = returnArray[1];
     console.log("walletBalance: " + walletBalance);
     checkCorrectNetwork();
-    let contractBalance = await CheckReferralMint(walletAddress, walletBalance);
-    console.log("publicMintPrice: " + contractBalance);
+    let checkReturnValue = await CheckReferralMint(walletAddress, walletBalance);
     if (
-      (booleanCheckValuesForPriorityMint.hasMintedYetValue) &&
-      (booleanCheckValuesForPriorityMint.walletBalanceCheck) 
+      checkReturnValue 
     ) {
-      await mintContract(contractBalance);
+      await mintContract();
     }}
     else {console.log("error bro")}
   };
@@ -77,8 +44,10 @@ import createWriteContract from "../../createWriteContract";
   const mintContract = async (contractBalance) => {
     const nftContract = createWriteContract();
     try {
-      let nftTx = await nftContract.becomeAChad({
-        value: contractBalance._hex + 1,
+      let nftTx = await nftContract.becomeAPartnerChad(
+        formData.referalCode,
+        {
+        value: 1,
       });
       console.log("Mining....", nftTx.hash);
       let tx = await nftTx.wait();
@@ -92,29 +61,6 @@ import createWriteContract from "../../createWriteContract";
     }
   };
 
-  const ConnectWalletHandler = async () => {
-    if (window.ethereum) {
-      let addresses = await window.ethereum.request({
-        method: "eth_requestAccounts",
-      });
-      let userBalance = await accountChangeHandler(addresses[0]);
-      return [addresses[0], userBalance];
-    }
-  };
-
-  const accountChangeHandler = async (newAccount) => {
-    let userBalance = await getUserBalance(newAccount);
-    return userBalance;
-  };
-  const getUserBalance = async (address) => {
-    return await window.ethereum.request({
-      method: "eth_getBalance",
-      params: [address, "latest"],
-    });
-  };
-  const chainChangedHandler = () => {
-    window.location.reload();
-  };
   window.ethereum.on("accountsChanged", accountChangeHandler);
   window.ethereum.on("chainChanged", chainChangedHandler);
 
