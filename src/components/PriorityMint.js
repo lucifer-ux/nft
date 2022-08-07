@@ -7,46 +7,19 @@ import ErrorModal from "./ErrorModal/ErrorModal";
 import { useNavigate } from "react-router-dom";
 import "../App.css"
 import CircleLoader from "react-spinners/CircleLoader";
+import {checkCorrectNetwork, ConnectWalletHandler, accountChangeHandler, chainChangedHandler} from "./utilities/contract"
 
 const PriorityButton = (props) => {
-  const [boolValue, setBoolValue] = useState(false);
   const [loadingComp, setLoadingComp] = useState(false);
   const [errorModalValue, setErrorModalValue] = useState(false);
   const [hasMintedYet, setHasMintedYet] = useState(true);
   const [walletBalanceCheck, setWalletBalanceCheck] = useState(true);
 
   useEffect(() => {
-    contractRead.isReferralMintLive().then((res) => {
-      setBoolValue(res);
-    });
   }, [loadingComp ]);
   const Navigate = useNavigate()
   const ButtonEnalbled = () => {
-    return boolValue;
-  };
-  const checkCorrectNetwork = async () => {
-    if (window.ethereum.networkVersion !== 4) {
-      try {
-        await window.ethereum.request({
-          method: "wallet_switchEthereumChain",
-          params: [{ chainId: ethers.utils.hexValue(4) }],
-        });
-      } catch (err) {
-        if (err.code === 4902) {
-          await window.ethereum.request({
-            method: "wallet_addEthereumChain",
-            params: [
-              {
-                chainName: "Rinkeby Mainnet",
-                chainId: ethers.utils.hexValue(4),
-                nativeCurrency: { name: "ETH", decimals: 18, symbol: "ETH" },
-                rpcUrls: ["https://rinkeby.infura.io/v3/"],
-              },
-            ],
-          });
-        }
-      }
-    }
+    return true;
   };
 
   const mintingProcess = async () => {
@@ -69,8 +42,6 @@ const PriorityButton = (props) => {
   };
 
   const CheckPriorityMint = async (defaultAccount, userBalance) => {
-    let contractBalance = await contractRead.minReferralMintPrice();
-    console.log(contractBalance)
     let hasmintedYet = await contractRead.hasMinted(defaultAccount);
 
     if (hasmintedYet) {

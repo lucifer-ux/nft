@@ -1,7 +1,6 @@
 
 let booleanCheckValuesForReferralMint = {
-    walletBalanceCheck : true,
-    hasMintedYetValue : true
+    isPrivilegedTokenHolder : true
 }
 
 export default booleanCheckValuesForReferralMint;
