@@ -26,7 +26,7 @@ import {checkCorrectNetwork, ConnectWalletHandler, accountChangeHandler, chainCh
       console.log("already minted");
       alert("already minted")
       setHasMintedYet(false);
-      setErrorModalValue(true);
+      setErrorModalValue(true)
     }
     return !hasmintedYet
   };
