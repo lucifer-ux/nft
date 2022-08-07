@@ -7,46 +7,19 @@ import ErrorModal from "./ErrorModal/ErrorModal";
 import { useNavigate } from "react-router-dom";
 import "../App.css"
 import CircleLoader from "react-spinners/CircleLoader";
+import {checkCorrectNetwork, ConnectWalletHandler, accountChangeHandler, chainChangedHandler} from "./utilities/contract"
 
 const PriorityButton = (props) => {
-  const [boolValue, setBoolValue] = useState(false);
   const [loadingComp, setLoadingComp] = useState(false);
   const [errorModalValue, setErrorModalValue] = useState(false);
   const [hasMintedYet, setHasMintedYet] = useState(true);
   const [walletBalanceCheck, setWalletBalanceCheck] = useState(true);
 
   useEffect(() => {
-    contractRead.isReferralMintLive().then((res) => {
-      setBoolValue(res);
-    });
   }, [loadingComp ]);
   const Navigate = useNavigate()
   const ButtonEnalbled = () => {
-    return boolValue;
-  };
-  const checkCorrectNetwork = async () => {
-    if (window.ethereum.networkVersion !== 4) {
-      try {
-        await window.ethereum.request({
-          method: "wallet_switchEthereumChain",
-          params: [{ chainId: ethers.utils.hexValue(4) }],
-        });
-      } catch (err) {
-        if (err.code === 4902) {
-          await window.ethereum.request({
-            method: "wallet_addEthereumChain",
-            params: [
-              {
-                chainName: "Rinkeby Mainnet",
-                chainId: ethers.utils.hexValue(4),
-                nativeCurrency: { name: "ETH", decimals: 18, symbol: "ETH" },
-                rpcUrls: ["https://rinkeby.infura.io/v3/"],
-              },
-            ],
-          });
-        }
-      }
-    }
+    return true;
   };
 
   const mintingProcess = async () => {
@@ -57,9 +30,8 @@ const PriorityButton = (props) => {
     let walletBalance = returnArray[1];
     console.log("walletBalance: " + walletBalance);
     checkCorrectNetwork();
-    let contractBalance =  await CheckPriorityMint(walletAddress, walletBalance);
-    console.log("minPriorityMintPrice:"+ contractBalance._hex);
-    if( walletBalanceCheck && hasMintedYet ) {
+    await CheckPriorityMint(walletAddress, walletBalance);
+    if( hasMintedYet ) {
       Navigate('/formPriority')
       props.setState(true)
     }
@@ -69,8 +41,6 @@ const PriorityButton = (props) => {
   };
 
   const CheckPriorityMint = async (defaultAccount, userBalance) => {
-    let contractBalance = await contractRead.minReferralMintPrice();
-    console.log(contractBalance)
     let hasmintedYet = await contractRead.hasMinted(defaultAccount);
 
     if (hasmintedYet) {
@@ -78,41 +48,6 @@ const PriorityButton = (props) => {
       setErrorModalValue(true);
       console.log("already minted");
     }
-    if (ethers.BigNumber.from(userBalance).lte(contractBalance)) {
-      console.log(userBalance <= contractBalance)
-      console.log(ethers.BigNumber.from(userBalance))
-      console.log(contractBalance._hex)
-      setWalletBalanceCheck(false);
-      setErrorModalValue(true);
-      console.log("low balance");
-    }
-    return contractBalance
-  };
-
-  const ConnectWalletHandler = async () => {
-    if (window.ethereum) {
-      let addresses = await window.ethereum.request({
-        method: "eth_requestAccounts",
-      });
-      let userBalance = await accountChangeHandler(addresses[0]);
-      return [addresses[0], userBalance];
-    }
-  };
-
-  const accountChangeHandler = async (newAccount) => {
-    let userBalance = await getUserBalance(newAccount);
-    return userBalance;
-  };
-
-  const getUserBalance = async (address) => {
-    return await window.ethereum.request({
-      method: "eth_getBalance",
-      params: [address, "latest"],
-    });
-  };
-
-  const chainChangedHandler = () => {
-    window.location.reload();
   };
 
   window.ethereum.on("accountsChanged", accountChangeHandler);
@@ -128,18 +63,6 @@ const PriorityButton = (props) => {
             <ErrorModal
               text="Aleready minted!!"
               body="You can mint only once"
-              buttonText="Go back"
-              setErrorModalValue={setErrorModalValue}
-            />
-          )}
-      </h1>
-      <h1>
-        {!walletBalanceCheck &&
-          !loadingComp &&
-          errorModalValue && (
-            <ErrorModal
-              text="Low Wallet Balance!!"
-              body="You dont have what it takes to become a chad"
               buttonText="Go back"
               setErrorModalValue={setErrorModalValue}
             />

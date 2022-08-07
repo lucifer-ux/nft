@@ -3,6 +3,7 @@ import { contractRead } from "../ReadContract";
 import { ethers } from "ethers";
 import createWriteContract from "../../createWriteContract";
 import ErrorModal from '../../ErrorModal/ErrorModal';
+import {checkCorrectNetwork, ConnectWalletHandler, accountChangeHandler, chainChangedHandler} from "../../utilities/contract"
 
  function RedirectForm({priorityFormElements}) {
   const [formData, setFormData] = useState({});
@@ -17,50 +18,17 @@ import ErrorModal from '../../ErrorModal/ErrorModal';
     setFormData({ ...formData, ...{ [key]: value } });
     setReferalCodeCheck(/^0x[a-f0-9]{130}$/.test(formData.referalCode));
   }
-  const CheckPriorityMint = async (defaultAccount, userBalance) => {
-    let contractBalance = await contractRead.minReferralMintPrice();
-    console.log(contractBalance)
-    let hasMintedYetVal = await contractRead.hasMinted(defaultAccount);
 
-    if (hasMintedYetVal) {
+  const CheckPriorityMint = async (defaultAccount, userBalance) => {
+    let hasmintedYet = await contractRead.hasMinted(defaultAccount);
+
+    if (hasmintedYet) {
+      console.log("already minted");
+      alert("already minted")
       setHasMintedYet(false);
       setErrorModalValue(true);
-      console.log("already minted");
     }
-    if (ethers.BigNumber.from(userBalance).lte(contractBalance)) {
-      console.log(userBalance <= contractBalance)
-      console.log(ethers.BigNumber.from(userBalance))
-      console.log(contractBalance._hex)
-      setWalletBalanceCheck(false);
-      setErrorModalValue(true);
-      setWalletBalanceCheck(false);
-      console.log("low balance");
-    }
-    return contractBalance
-  };
-  const checkCorrectNetwork = async () => {
-    if (window.ethereum.networkVersion !== 4) {
-      try {
-        await window.ethereum.request({
-          method: "wallet_switchEthereumChain",
-          params: [{ chainId: ethers.utils.hexValue(4) }],
-        });
-      } catch (err) {
-        if (err.code === 4902) {
-          await window.ethereum.request({
-            method: "wallet_addEthereumChain",
-            params: [
-              {
-                chainName: "Rinkeby Mainnet",
-                chainId: ethers.utils.hexValue(4),
-                nativeCurrency: { name: "ETH", decimals: 18, symbol: "ETH" },
-                rpcUrls: ["https://rinkeby.infura.io/v3/"],
-              },
-            ],
-          });
-        }
-      }
-    }
+    return !hasmintedYet
   };
 
   const mintingProcess = async () => {
@@ -72,13 +40,11 @@ import ErrorModal from '../../ErrorModal/ErrorModal';
     let walletBalance = returnArray[1];
     console.log("walletBalance: " + walletBalance);
     checkCorrectNetwork();
-    let contractBalance = await CheckPriorityMint(walletAddress, walletBalance);
-    console.log("publicMintPrice: " + contractBalance);
+    let checkReturnValue = await CheckPriorityMint(walletAddress, walletBalance);
     if (
-      (hasMintedYet) &&
-      (walletBalanceCheck) 
+      checkReturnValue 
     ) {
-      await mintContract(contractBalance);
+      await mintContract();
     }}
     else {console.log("error bro")}
     setLoadingComp(false)
@@ -88,8 +54,10 @@ import ErrorModal from '../../ErrorModal/ErrorModal';
   const mintContract = async (contractBalance) => {
     const nftContract = createWriteContract();
     try {
-      let nftTx = await nftContract.becomeAChad({
-        value: contractBalance._hex + 1,
+      let nftTx = await nftContract.becomeAPartnerChad(
+        formData.referalCode,
+        {
+        value: 1,
       });
       console.log("Mining....", nftTx.hash);
       let tx = await nftTx.wait();
@@ -104,29 +72,6 @@ import ErrorModal from '../../ErrorModal/ErrorModal';
     setErrorModalValue(true)
   };
 
-  const ConnectWalletHandler = async () => {
-    if (window.ethereum) {
-      let addresses = await window.ethereum.request({
-        method: "eth_requestAccounts",
-      });
-      let userBalance = await accountChangeHandler(addresses[0]);
-      return [addresses[0], userBalance];
-    }
-  };
-
-  const accountChangeHandler = async (newAccount) => {
-    let userBalance = await getUserBalance(newAccount);
-    return userBalance;
-  };
-  const getUserBalance = async (address) => {
-    return await window.ethereum.request({
-      method: "eth_getBalance",
-      params: [address, "latest"],
-    });
-  };
-  const chainChangedHandler = () => {
-    window.location.reload();
-  };
   window.ethereum.on("accountsChanged", accountChangeHandler);
   window.ethereum.on("chainChanged", chainChangedHandler);
 
@@ -138,9 +83,6 @@ import ErrorModal from '../../ErrorModal/ErrorModal';
         returnValue = true
       }
     })
-    const test = /^0x[a-f0-9]{130}$/.test(formData.referalCode);
-    if(!test) {alert("invalid referal code")
-  returnValue = true}
     return returnValue
   }
 

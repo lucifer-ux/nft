@@ -4,6 +4,7 @@ import { contractRead } from "../resources/ReadContract";
 import { ethers } from "ethers";
 import createWriteContract from "../createWriteContract";
 import ErrorModal from "../ErrorModal/ErrorModal";
+import {checkCorrectNetwork, ConnectWalletHandler, accountChangeHandler, chainChangedHandler} from "../utilities/contract"
 
 function RedirectForm({ formElements }) {
   const [formData, setFormData] = useState({});
@@ -22,45 +23,40 @@ function RedirectForm({ formElements }) {
     setReferalCodeCheck(/^0x[a-f0-9]{130}$/.test(formData.referalCode));
   };
 
-  const CheckReferralMint = async (defaultAccount, userBalance) => {
-    let contractBalance = await contractRead.minReferralMintPrice();
-    console.log(contractBalance);
-    let hasmintedYetVal = await contractRead.hasMinted(defaultAccount);
+  const CheckReferralMintForm = async (defaultAccount, userBalance) => {
+    let minReferralMintPrice = await contractRead.minReferralMintPrice();
+    console.log("minReferralPrice: " + minReferralMintPrice);
 
-    if (hasmintedYetVal) {
-      setHasMintedYet(false);
+    console.log(minReferralMintPrice);
+    let hasmintedYetValue = await contractRead.hasMinted(defaultAccount);
+    let isTokenPrivileged = await contractRead.isTokenPrivileged(parseInt(formData.tokenId))
+    let MintingPriceLessThanMinReferralMintPrice = ethers.utils.parseEther(formData.mintingPrice).lt(minReferralMintPrice)
+    let BalanceLessThanMintingPrice = ethers.BigNumber.from(userBalance).lte(ethers.utils.parseEther(formData.mintingPrice))
+
+    if (hasmintedYetValue) {
+
       console.log("already minted");
+      setHasMintedYet(false)
+      alert("already minted");
     }
-    if (userBalance > contractBalance._hex) {
-      console.log(userBalance <= contractBalance._hex);
+    if (MintingPriceLessThanMinReferralMintPrice) {
+      console.log("low minting price");
+      alert("low minting price")
       setWalletBalanceCheck(false);
-      console.log("low balance");
     }
-    return contractBalance;
-  };
-  const checkCorrectNetwork = async () => {
-    if (window.ethereum.networkVersion !== 4) {
-      try {
-        await window.ethereum.request({
-          method: "wallet_switchEthereumChain",
-          params: [{ chainId: ethers.utils.hexValue(4) }],
-        });
-      } catch (err) {
-        if (err.code === 4902) {
-          await window.ethereum.request({
-            method: "wallet_addEthereumChain",
-            params: [
-              {
-                chainName: "Rinkeby Mainnet",
-                chainId: ethers.utils.hexValue(4),
-                nativeCurrency: { name: "ETH", decimals: 18, symbol: "ETH" },
-                rpcUrls: ["https://rinkeby.infura.io/v3/"],
-              },
-            ],
-          });
-        }
-      }
+    if(!isTokenPrivileged){
+      console.log("token  ID not privileged")
+      alert("token  ID not privileged")
     }
+
+    if(BalanceLessThanMintingPrice){
+      console.log("low balance")
+      alert("low balance")
+    }
+
+    return (!hasmintedYetValue) && (!MintingPriceLessThanMinReferralMintPrice) && isTokenPrivileged && (!BalanceLessThanMintingPrice);
+
+
   };
 
   const mintingProcess = async () => {
@@ -73,13 +69,14 @@ function RedirectForm({ formElements }) {
       let walletBalance = returnArray[1];
       console.log("walletBalance: " + walletBalance);
       checkCorrectNetwork();
-      let contractBalance = await CheckReferralMint(
+      let checkReturnValue = await CheckReferralMintForm(
         walletAddress,
         walletBalance
       );
-      console.log("publicMintPrice: " + contractBalance);
-      if (hasMintedYet && walletBalanceCheck) {
-        await mintContract(contractBalance);
+      if (
+       checkReturnValue
+      ) {
+        await mintContract();
       }
     } else {
       console.log("error bro");
@@ -87,11 +84,14 @@ function RedirectForm({ formElements }) {
     setLoadingComp(false);
   };
 
-  const mintContract = async (contractBalance) => {
+  const mintContract = async () => {
     const nftContract = createWriteContract();
     try {
-      let nftTx = await nftContract.becomeAChad({
-        value: contractBalance._hex + 1,
+      let nftTx = await nftContract.becomeAR2EChad(parseInt(formData.tokenId),
+      ethers.utils.parseEther(formData.mintingPrice),
+      formData.referalCode,
+      {
+        value: ethers.utils.parseEther(formData.mintingPrice).add(1),
       });
       console.log("Mining....", nftTx.hash);
       let tx = await nftTx.wait();
@@ -106,29 +106,6 @@ function RedirectForm({ formElements }) {
     setErrorModalValue(true);
   };
 
-  const ConnectWalletHandler = async () => {
-    if (window.ethereum) {
-      let addresses = await window.ethereum.request({
-        method: "eth_requestAccounts",
-      });
-      let userBalance = await accountChangeHandler(addresses[0]);
-      return [addresses[0], userBalance];
-    }
-  };
-
-  const accountChangeHandler = async (newAccount) => {
-    let userBalance = await getUserBalance(newAccount);
-    return userBalance;
-  };
-  const getUserBalance = async (address) => {
-    return await window.ethereum.request({
-      method: "eth_getBalance",
-      params: [address, "latest"],
-    });
-  };
-  const chainChangedHandler = () => {
-    window.location.reload();
-  };
   window.ethereum.on("accountsChanged", accountChangeHandler);
   window.ethereum.on("chainChanged", chainChangedHandler);
 
@@ -140,18 +117,17 @@ function RedirectForm({ formElements }) {
         formData[formElement.key] === undefined ||
         formData[formElement.key] === ""
       ) {
-        // regex, tokein id integer, mintPrice should be float value, referal code regex check
         alert(formElement.label + " is Missing");
         returnValue = true;
       }
     });
-    // const test = /^0x[a-f0-9]{130}$/.test(formData.referalCode);
-    // if (!test) {
-    //   alert("invalid referal code");
-    //   returnValue = true;
-    // }
     if (!Number.isInteger(parseInt(formData.tokenId))) {
       alert("tokenId should be Integer");
+      returnValue = true;
+    }
+    if(Number.isNaN(parseFloat(formData.mintingPrice))) {
+      
+      alert("minting Price should be in float")
       returnValue = true;
     }
 
