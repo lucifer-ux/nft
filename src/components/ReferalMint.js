@@ -2,7 +2,6 @@ import React from "react";
 import Button from "./Button/Button";
 import { useState, useEffect } from "react";
 import { ethers } from "ethers";
-import booleanCheckValuesForReferralMint from "./resources/booleanCheckValuesForReferralMint";
 import { contractRead } from "./resources/ReadContract";
 import ErrorModal from "./ErrorModal/ErrorModal";
 import { useNavigate } from "react-router-dom";
@@ -12,7 +11,9 @@ const ReferralButton = (props) => {
   const [boolValue, setBoolValue] = useState(false);
   const [loadingComp, setLoadingComp] = useState(false);
   const [errorModalValue, setErrorModalValue] = useState(false);
-
+  const [hasMintedYet, setHasMintedYet] = useState(true);
+  const [walletBalanceCheck, setWalletBalanceCheck] = useState(true);
+  
   useEffect(() => {
     contractRead.isReferralMintLive().then((res) => {
       setBoolValue(res);
@@ -59,7 +60,7 @@ const ReferralButton = (props) => {
     checkCorrectNetwork();
     let contractBalance =  await CheckReferralMint(walletAddress, walletBalance);
     console.log("minReferralMintPrice:"+ contractBalance._hex);
-    if( booleanCheckValuesForReferralMint.walletBalanceCheck && booleanCheckValuesForReferralMint.hasMintedYetValue ) {
+    if( walletBalanceCheck && hasMintedYet ) {
       props.setState(true)
       Navigate('/form')}
     setLoadingComp(false);
@@ -71,7 +72,7 @@ const ReferralButton = (props) => {
     let hasmintedYet = await contractRead.hasMinted(defaultAccount);
 
     if (hasmintedYet) {
-      booleanCheckValuesForReferralMint.hasMintedYetValue = false;
+      setHasMintedYet(false);
       setErrorModalValue(true);
       console.log("already minted");
     }
@@ -79,7 +80,7 @@ const ReferralButton = (props) => {
       console.log(userBalance <= contractBalance)
       console.log(ethers.BigNumber.from(userBalance))
       console.log(contractBalance._hex)
-      booleanCheckValuesForReferralMint.walletBalanceCheck = false;
+      setWalletBalanceCheck(false);
       setErrorModalValue(true);
       console.log("low balance");
     }
@@ -119,7 +120,7 @@ const ReferralButton = (props) => {
       {/* <h1>balance : {userBalance}</h1> wallet balance
       <h1>account : {defaultAccount}</h1> wallet address */}
       <h1>
-        {!booleanCheckValuesForReferralMint.hasMintedYetValue &&
+        {!hasMintedYet &&
           !loadingComp &&
           errorModalValue && (
             <ErrorModal
@@ -131,7 +132,7 @@ const ReferralButton = (props) => {
           )}
       </h1>
       <h1>
-        {!booleanCheckValuesForReferralMint.walletBalanceCheck &&
+        {!walletBalanceCheck &&
           !loadingComp &&
           errorModalValue && (
             <ErrorModal

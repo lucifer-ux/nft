@@ -2,7 +2,6 @@ import React, { useEffect, useState } from "react";
 import "./RedirectForm.css";
 import { contractRead } from "../resources/ReadContract";
 import { ethers } from "ethers";
-import booleanCheckValuesForReferralMint from "../resources/booleanCheckValuesForReferralMint";
 import createWriteContract from "../createWriteContract";
 import ErrorModal from "../ErrorModal/ErrorModal";
 
@@ -11,25 +10,30 @@ function RedirectForm({ formElements }) {
   const [transState, setTransState] = useState(null);
   const [errorModalValue, setErrorModalValue] = useState(false);
   const [loadingComp, setLoadingComp] = useState(false);
-
+  const [hasMintedYet, setHasMintedYet] = useState(true);
+  const [walletBalanceCheck, setWalletBalanceCheck] = useState(true);
+  const [tokenIdCheck, setTokenIdCheck] = useState(true);
+  const [referalCodeCheck, setReferalCodeCheck] = useState(true);
+  
   useEffect(() => {}, [loadingComp]);
-
   const handleChange = (value, key) => {
     setFormData({ ...formData, ...{ [key]: value } });
+    setTokenIdCheck(Number.isInteger(parseInt(formData.tokenId)));
+    setReferalCodeCheck(/^0x[a-f0-9]{130}$/.test(formData.referalCode));
   };
 
   const CheckReferralMint = async (defaultAccount, userBalance) => {
     let contractBalance = await contractRead.minReferralMintPrice();
     console.log(contractBalance);
-    let hasmintedYet = await contractRead.hasMinted(defaultAccount);
+    let hasmintedYetVal = await contractRead.hasMinted(defaultAccount);
 
-    if (hasmintedYet) {
-      booleanCheckValuesForReferralMint.hasMintedYetValue = false;
+    if (hasmintedYetVal) {
+      setHasMintedYet(false);
       console.log("already minted");
     }
     if (userBalance > contractBalance._hex) {
       console.log(userBalance <= contractBalance._hex);
-      booleanCheckValuesForReferralMint.walletBalanceCheck = false;
+      setWalletBalanceCheck(false);
       console.log("low balance");
     }
     return contractBalance;
@@ -60,7 +64,7 @@ function RedirectForm({ formElements }) {
   };
 
   const mintingProcess = async () => {
-    setLoadingComp(true)
+    setLoadingComp(true);
     console.log(formData);
     if (!(await isFormInValid())) {
       let returnArray = await ConnectWalletHandler();
@@ -74,17 +78,13 @@ function RedirectForm({ formElements }) {
         walletBalance
       );
       console.log("publicMintPrice: " + contractBalance);
-      if (
-        booleanCheckValuesForReferralMint.hasMintedYetValue &&
-        booleanCheckValuesForReferralMint.walletBalanceCheck
-      ) {
+      if (hasMintedYet && walletBalanceCheck) {
         await mintContract(contractBalance);
       }
-    }
-    else {
+    } else {
       console.log("error bro");
     }
-    setLoadingComp(false)
+    setLoadingComp(false);
   };
 
   const mintContract = async (contractBalance) => {
@@ -103,6 +103,7 @@ function RedirectForm({ formElements }) {
       console.log("Error minting", error);
       setTransState(error.message);
     }
+    setErrorModalValue(true);
   };
 
   const ConnectWalletHandler = async () => {
@@ -144,11 +145,11 @@ function RedirectForm({ formElements }) {
         returnValue = true;
       }
     });
-    const test = /^0x[a-f0-9]{130}$/.test(formData.referalCode);
-    if (!test) {
-      alert("invalid referal code");
-      returnValue = true;
-    }
+    // const test = /^0x[a-f0-9]{130}$/.test(formData.referalCode);
+    // if (!test) {
+    //   alert("invalid referal code");
+    //   returnValue = true;
+    // }
     if (!Number.isInteger(parseInt(formData.tokenId))) {
       alert("tokenId should be Integer");
       returnValue = true;
@@ -171,10 +172,47 @@ function RedirectForm({ formElements }) {
                   handleChange(e.target.value, formElement.key);
                 }}
               />
+              <p
+                className={
+                  formElement.key === "tokenId" && !tokenIdCheck 
+                    ? "visible"
+                    : "gone"
+                }
+              >
+                Wrong Credential
+              </p>
+              <p
+                className={
+                  formElement.key === "referalCode" && !referalCodeCheck && formData["referalCode"] != ""
+                    ? "visible"
+                    : "gone"
+                }
+              >
+                Wrong Credential
+              </p>
             </div>
           );
         })}
-
+        <h1>
+          {!hasMintedYet && !loadingComp && errorModalValue && (
+            <ErrorModal
+              text="Aleready minted!!"
+              body="You can mint only once"
+              buttonText="Go back"
+              setErrorModalValue={setErrorModalValue}
+            />
+          )}
+        </h1>
+        <h1>
+          {!walletBalanceCheck && !loadingComp && errorModalValue && (
+            <ErrorModal
+              text="Low Wallet Balance!!"
+              body="You dont have what it takes to become a chad"
+              buttonText="Go back"
+              setErrorModalValue={setErrorModalValue}
+            />
+          )}
+        </h1>
         {transState != null && !loadingComp && errorModalValue && (
           <ErrorModal
             text="Transaction Status!!"

@@ -4,7 +4,6 @@ import { useState } from "react";
 import { ethers } from "ethers";
 import { contractRead } from "./resources/ReadContract";
 import { useEffect } from "react";
-import booleanCheckValues from "./resources/booleanCheckValuesPublicMint";
 import createWriteContract from "./createWriteContract";
 import ErrorModal from "./ErrorModal/ErrorModal";
 import CircleLoader from "react-spinners/CircleLoader";
@@ -14,6 +13,8 @@ const PublicMint = () => {
   const [loadingComp, setLoadingComp] = useState(false);
   const [transState, setTransState] = useState(null);
   const [errorModalValue, setErrorModalValue] = useState(false);
+  const [hasMintedYet, setHasMintedYet] = useState(true)
+  const [walletBalanceCheck, setWalletBalanceCheck] = useState(true)
 
   useEffect(() => {
     contractRead.isPublicMintLive().then((res) => {
@@ -79,8 +80,8 @@ const PublicMint = () => {
     let contractBalance = await CheckPublicMint(walletAddress, walletBalance);
     console.log("publicMintPrice: " + contractBalance);
     if (
-      booleanCheckValues.hasMintedYetValue &&
-      booleanCheckValues.walletBalanceCheck
+      hasMintedYet &&
+      walletBalanceCheck
     ) {
       await mintContract(contractBalance);
     }
@@ -94,12 +95,12 @@ const PublicMint = () => {
     let hasmintedYet = await contractRead.hasMinted(defaultAccount);
 
     if (hasmintedYet) {
-      booleanCheckValues.hasMintedYetValue = false;
+      setHasMintedYet(false);
       setErrorModalValue(true);
       console.log("already minted");
     }
     if (ethers.BigNumber.from(userBalance).lte(contractBalance)) {
-      booleanCheckValues.walletBalanceCheck = false;
+      setWalletBalanceCheck(false);
       setErrorModalValue(true);
       console.log("low balance");
     }
@@ -137,7 +138,7 @@ const PublicMint = () => {
       {/* <h1>balance : {userBalance}</h1> wallet balance
       <h1>account : {defaultAccount}</h1> wallet address */}
       <h1>
-        {!booleanCheckValues.hasMintedYetValue &&
+        {!hasMintedYet &&
           !loadingComp &&
           errorModalValue && (
             <ErrorModal
@@ -149,7 +150,7 @@ const PublicMint = () => {
           )}
       </h1>
       <h1>
-        {!booleanCheckValues.walletBalanceCheck &&
+        {!walletBalanceCheck &&
           !loadingComp &&
           errorModalValue && (
             <ErrorModal

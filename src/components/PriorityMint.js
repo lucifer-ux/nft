@@ -2,7 +2,6 @@ import React from "react";
 import Button from "./Button/Button";
 import { useState, useEffect } from "react";
 import { ethers } from "ethers";
-import booleanCheckValuesForPriorityMint from "./resources/booleanCheckValuesForPriorityMint";
 import { contractRead } from "./resources/ReadContract";
 import ErrorModal from "./ErrorModal/ErrorModal";
 import { useNavigate } from "react-router-dom";
@@ -13,6 +12,8 @@ const PriorityButton = (props) => {
   const [boolValue, setBoolValue] = useState(false);
   const [loadingComp, setLoadingComp] = useState(false);
   const [errorModalValue, setErrorModalValue] = useState(false);
+  const [hasMintedYet, setHasMintedYet] = useState(true);
+  const [walletBalanceCheck, setWalletBalanceCheck] = useState(true);
 
   useEffect(() => {
     contractRead.isReferralMintLive().then((res) => {
@@ -58,7 +59,7 @@ const PriorityButton = (props) => {
     checkCorrectNetwork();
     let contractBalance =  await CheckPriorityMint(walletAddress, walletBalance);
     console.log("minPriorityMintPrice:"+ contractBalance._hex);
-    if( booleanCheckValuesForPriorityMint.walletBalanceCheck && booleanCheckValuesForPriorityMint.hasMintedYetValue ) {
+    if( walletBalanceCheck && hasMintedYet ) {
       Navigate('/formPriority')
       props.setState(true)
     }
@@ -73,7 +74,7 @@ const PriorityButton = (props) => {
     let hasmintedYet = await contractRead.hasMinted(defaultAccount);
 
     if (hasmintedYet) {
-      booleanCheckValuesForPriorityMint.hasMintedYetValue = false;
+      setHasMintedYet(false);
       setErrorModalValue(true);
       console.log("already minted");
     }
@@ -81,7 +82,7 @@ const PriorityButton = (props) => {
       console.log(userBalance <= contractBalance)
       console.log(ethers.BigNumber.from(userBalance))
       console.log(contractBalance._hex)
-      booleanCheckValuesForPriorityMint.walletBalanceCheck = false;
+      setWalletBalanceCheck(false);
       setErrorModalValue(true);
       console.log("low balance");
     }
@@ -120,10 +121,8 @@ const PriorityButton = (props) => {
 
   return (
     <div >
-      {/* <h1>balance : {userBalance}</h1> wallet balance
-      <h1>account : {defaultAccount}</h1> wallet address */}
       <h1>
-        {!booleanCheckValuesForPriorityMint.hasMintedYetValue &&
+        {!hasMintedYet &&
           !loadingComp &&
           errorModalValue && (
             <ErrorModal
@@ -135,7 +134,7 @@ const PriorityButton = (props) => {
           )}
       </h1>
       <h1>
-        {!booleanCheckValuesForPriorityMint.walletBalanceCheck &&
+        {!walletBalanceCheck &&
           !loadingComp &&
           errorModalValue && (
             <ErrorModal

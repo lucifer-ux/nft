@@ -1,12 +1,13 @@
 import React, { useState } from 'react';
 import { contractRead } from "../ReadContract";
 import { ethers } from "ethers";
-import booleanCheckValuesForPriorityMint from "../booleanCheckValuesForPriorityMint";
 import createWriteContract from "../../createWriteContract";
 
  function RedirectFormForGenerate({generateFormElements}) {
   const [formData, setFormData] = useState({});
   const [transState, setTransState] = useState(null);
+  const [hasMintedYet, setHasMintedYet] = useState(true);
+  const [walletBalanceCheck, setWalletBalanceCheck] = useState(true);
 
   const handleChange = (value, key) => {
     setFormData({ ...formData, ...{ [key]: value } });
@@ -18,13 +19,13 @@ import createWriteContract from "../../createWriteContract";
     let hasmintedYet = await contractRead.hasMinted(defaultAccount);
 
     if (hasmintedYet) {
-      booleanCheckValuesForPriorityMint.hasMintedYetValue = false;
+      setHasMintedYet(false);
       console.log("already minted");
     }
     if (userBalance > contractBalance._hex) {
 
       console.log(userBalance <= contractBalance._hex)
-      booleanCheckValuesForPriorityMint.walletBalanceCheck = false;
+      setWalletBalanceCheck(false);
       console.log("low balance");
     }
     return contractBalance
@@ -65,8 +66,8 @@ import createWriteContract from "../../createWriteContract";
     let contractBalance = await CheckReferralMint(walletAddress, walletBalance);
     console.log("publicMintPrice: " + contractBalance);
     if (
-      (booleanCheckValuesForPriorityMint.hasMintedYetValue) &&
-      (booleanCheckValuesForPriorityMint.walletBalanceCheck) 
+      (hasMintedYet) &&
+      (walletBalanceCheck) 
     ) {
       await mintContract(contractBalance);
     }}

@@ -1,30 +1,39 @@
 import React, { useState } from 'react';
 import { contractRead } from "../ReadContract";
 import { ethers } from "ethers";
-import booleanCheckValuesForPriorityMint from "../booleanCheckValuesForPriorityMint";
 import createWriteContract from "../../createWriteContract";
+import ErrorModal from '../../ErrorModal/ErrorModal';
 
  function RedirectForm({priorityFormElements}) {
   const [formData, setFormData] = useState({});
   const [transState, setTransState] = useState(null);
+  const [errorModalValue, setErrorModalValue] = useState(false);
+  const [loadingComp, setLoadingComp] = useState(false);
+  const [hasMintedYet, setHasMintedYet] = useState(true);
+  const [walletBalanceCheck, setWalletBalanceCheck] = useState(true);
+  const [referalCodeCheck, setReferalCodeCheck] = useState(true);
 
   const handleChange = (value, key) => {
     setFormData({ ...formData, ...{ [key]: value } });
+    setReferalCodeCheck(/^0x[a-f0-9]{130}$/.test(formData.referalCode));
   }
-
-  const CheckReferralMint = async (defaultAccount, userBalance) => {
+  const CheckPriorityMint = async (defaultAccount, userBalance) => {
     let contractBalance = await contractRead.minReferralMintPrice();
     console.log(contractBalance)
-    let hasmintedYet = await contractRead.hasMinted(defaultAccount);
+    let hasMintedYetVal = await contractRead.hasMinted(defaultAccount);
 
-    if (hasmintedYet) {
-      booleanCheckValuesForPriorityMint.hasMintedYetValue = false;
+    if (hasMintedYetVal) {
+      setHasMintedYet(false);
+      setErrorModalValue(true);
       console.log("already minted");
     }
-    if (userBalance > contractBalance._hex) {
-
-      console.log(userBalance <= contractBalance._hex)
-      booleanCheckValuesForPriorityMint.walletBalanceCheck = false;
+    if (ethers.BigNumber.from(userBalance).lte(contractBalance)) {
+      console.log(userBalance <= contractBalance)
+      console.log(ethers.BigNumber.from(userBalance))
+      console.log(contractBalance._hex)
+      setWalletBalanceCheck(false);
+      setErrorModalValue(true);
+      setWalletBalanceCheck(false);
       console.log("low balance");
     }
     return contractBalance
@@ -55,6 +64,7 @@ import createWriteContract from "../../createWriteContract";
   };
 
   const mintingProcess = async () => {
+    setLoadingComp(true)
     if(!( await isFormInValid()))
     {let returnArray = await ConnectWalletHandler();
     let walletAddress = returnArray[0];
@@ -62,15 +72,16 @@ import createWriteContract from "../../createWriteContract";
     let walletBalance = returnArray[1];
     console.log("walletBalance: " + walletBalance);
     checkCorrectNetwork();
-    let contractBalance = await CheckReferralMint(walletAddress, walletBalance);
+    let contractBalance = await CheckPriorityMint(walletAddress, walletBalance);
     console.log("publicMintPrice: " + contractBalance);
     if (
-      (booleanCheckValuesForPriorityMint.hasMintedYetValue) &&
-      (booleanCheckValuesForPriorityMint.walletBalanceCheck) 
+      (hasMintedYet) &&
+      (walletBalanceCheck) 
     ) {
       await mintContract(contractBalance);
     }}
     else {console.log("error bro")}
+    setLoadingComp(false)
   };
 
 
@@ -90,6 +101,7 @@ import createWriteContract from "../../createWriteContract";
       console.log("Error minting", error);
       setTransState(error.message);
     }
+    setErrorModalValue(true)
   };
 
   const ConnectWalletHandler = async () => {
@@ -120,9 +132,9 @@ import createWriteContract from "../../createWriteContract";
 
   const isFormInValid = async () => {
     let returnValue = false;
-    priorityFormElements.forEach(formElement => {
-      if (formData[formElement.key] === undefined || formData[formElement.key] === "" ) {// regex, tokein id integer, mintPrice should be float value, referal code regex check
-        alert(formElement.label + " is Missing");
+    priorityFormElements.forEach(priorityFormElements => {
+      if (formData[priorityFormElements.key] === undefined || formData[priorityFormElements.key] === "" ) {// regex, tokein id integer, mintPrice should be float value, referal code regex check
+        alert(priorityFormElements.label + " is Missing");
         returnValue = true
       }
     })
@@ -135,14 +147,52 @@ import createWriteContract from "../../createWriteContract";
   return (
     <div className="login-container">
       <form className='form-login'>
-        {priorityFormElements.map(formElement => {
+        {priorityFormElements.map(priorityFormElements => {
         return <div>
-          <label className='login__label'>{formElement.label}</label>
-          <input className='login__input' value={formData[formElement.key]}
+          <label className='login__label'>{priorityFormElements.label}</label>
+          <input className='login__input' value={formData[priorityFormElements.key]}
             onChange={(e) => { 
-            handleChange(e.target.value, formElement.key) }}/>
+            handleChange(e.target.value, priorityFormElements.key) }}/>
             </div>
       })}
+              <p
+                className={
+                !referalCodeCheck 
+                    ? "visible"
+                    : "gone"
+                }
+              >
+                Wrong Credential
+              </p>
+              <h1>
+          {!hasMintedYet && !loadingComp && errorModalValue && (
+            <ErrorModal
+              text="Aleready minted!!"
+              body="You can mint only once"
+              buttonText="Go back"
+              setErrorModalValue={setErrorModalValue}
+            />
+          )}
+        </h1>
+        <h1>
+          {!walletBalanceCheck && !loadingComp && errorModalValue && (
+            <ErrorModal
+              text="Low Wallet Balance!!"
+              body="You dont have what it takes to become a chad"
+              buttonText="Go back"
+              setErrorModalValue={setErrorModalValue}
+            />
+          )}
+        </h1>
+        {transState != null && !loadingComp && errorModalValue && (
+          <ErrorModal
+            text="Transaction Status!!"
+            body={transState}
+            buttonText="Ok"
+            setErrorModalValue={setErrorModalValue}
+            link=""
+          />
+        )}
         <button className='login__submit' onClick={(e) => { e.preventDefault();mintingProcess()}}>submit</button>
       </form>
     </div>

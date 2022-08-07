@@ -48,6 +48,13 @@ body{
 	font-size: .75rem;
 	margin: 1.5rem;
 }
+.visible{
+	visibility: visible;
+	color: red;
+}
+.gone{
+	visibility:hidden;
+}
 
 .login__input {
 	color: white;
@@ -55,6 +62,18 @@ body{
 	width: 100%;
 	padding: .5rem 1rem;
 	border: 2px solid transparent;
+	outline: none;
+	border-radius: 1.5rem;
+	background-color: rgba(255, 255, 255, 0.25);
+	letter-spacing: 1px;
+}
+
+.login__error__input{
+	color: white;
+	font-size: 1.15rem;
+	width: 100%;
+	padding: .5rem 1rem;
+	border: 2px solid red;
 	outline: none;
 	border-radius: 1.5rem;
 	background-color: rgba(255, 255, 255, 0.25);
