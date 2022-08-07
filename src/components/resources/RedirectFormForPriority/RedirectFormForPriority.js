@@ -4,6 +4,7 @@ import { ethers } from "ethers";
 import createWriteContract from "../../createWriteContract";
 import ErrorModal from '../../ErrorModal/ErrorModal';
 import {checkCorrectNetwork, ConnectWalletHandler, accountChangeHandler, chainChangedHandler} from "../../utilities/contract"
+import CircleLoader from "react-spinners/CircleLoader";
 
  function RedirectForm({priorityFormElements}) {
   const [formData, setFormData] = useState({});
@@ -23,8 +24,6 @@ import {checkCorrectNetwork, ConnectWalletHandler, accountChangeHandler, chainCh
     let hasmintedYet = await contractRead.hasMinted(defaultAccount);
 
     if (hasmintedYet) {
-      console.log("already minted");
-      alert("already minted")
       setHasMintedYet(false);
       setErrorModalValue(true)
     }
@@ -135,6 +134,7 @@ import {checkCorrectNetwork, ConnectWalletHandler, accountChangeHandler, chainCh
             link=""
           />
         )}
+              <CircleLoader color="#CCD5E0" loading = {loadingComp} speedMultiplier = "3" id = "loader"/>
         <button className='login__submit' onClick={(e) => { e.preventDefault();mintingProcess()}}>submit</button>
       </form>
     </div>

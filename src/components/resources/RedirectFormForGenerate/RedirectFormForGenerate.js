@@ -4,12 +4,19 @@ import { ethers } from "ethers";
 import createWriteContract from "../../createWriteContract";
 import {checkCorrectNetwork, ConnectWalletHandler, accountChangeHandler, chainChangedHandler} from "../../utilities/contract"
 import {generateReferralCode} from "./generateCode"
+import ErrorModal from '../../ErrorModal/ErrorModal';
+import CircleLoader from "react-spinners/CircleLoader";
+
 
  function RedirectFormForGenerate({generateFormElements}) {
   const [formData, setFormData] = useState({});
-  const [transState, setTransState] = useState(null);
+  const [wrongTokenEntered, setWrongTokenEntered] = useState(null);
   const [hasMintedYet, setHasMintedYet] = useState(true);
-  const [walletBalanceCheck, setWalletBalanceCheck] = useState(true);
+  const [mintingPriceCheck, setMintingPriceCheck] = useState(true);
+  const [errorModalValue,setErrorModalValue] = useState(false);
+  const [signature, setSignature] = useState("");
+  const [loadingComp, setLoadingComp] = useState(false);
+  const [notPrivilidgedToken,setNotPrivilidgedToken ] = useState(false)
 
   const handleChange = (value, key) => {
     setFormData({ ...formData, ...{ [key]: value } });
@@ -40,29 +47,30 @@ import {generateReferralCode} from "./generateCode"
 
     if (ownedPrivilegedTokenIDs.length === 0) {
       console.log("You Don't Hold Elite NFT");
-      alert("You Dont Hold Elite NFT")
+      setNotPrivilidgedToken(true)
     }
 
     if (MintingPriceLessThanMinReferralMintPrice) {
-      setWalletBalanceCheck(false);
+      setMintingPriceCheck(true)
       console.log("low minting price");
-      alert("low minting price")
     }
 
     if(!ifRightTokenEntered) {
       console.log("This is not an owned Elite NFT")
       alert("This is not an owned Elite NFT")
+      setWrongTokenEntered(true)
     }
 
     if(AddressHasMinted) {
+      setHasMintedYet(true)
       console.log("This address has already minted")
-      alert("This address has already minted")
     }
     return (ownedPrivilegedTokenIDs.length > 0) && ifRightTokenEntered && (!MintingPriceLessThanMinReferralMintPrice) && (!AddressHasMinted);
   };
 
 
   const mintingProcess = async () => {
+    setLoadingComp(true)
     if(!( await isFormInValid()))
     {let returnArray = await ConnectWalletHandler();
     let walletAddress = returnArray[0];
@@ -74,9 +82,11 @@ import {generateReferralCode} from "./generateCode"
     if (
       checkReturnValue
     ) {
-      alert((await generateReferralCode(formData.walletAddress, formData.mintingPrice, parseInt(formData.tokenId))).signature);
+      setErrorModalValue(true)
+      setSignature((await generateReferralCode(formData.walletAddress, formData.mintingPrice, parseInt(formData.tokenId))).signature);
     }}
     else {console.log("error bro")}
+    setLoadingComp(false)
   };
 
   window.ethereum.on("accountsChanged", accountChangeHandler);
@@ -118,6 +128,52 @@ import {generateReferralCode} from "./generateCode"
             handleChange(e.target.value, formElement.key) }}/>
             </div>
       })}
+           {!loadingComp && (errorModalValue) &&
+           (<ErrorModal
+              text="Success"
+              body={signature}
+              buttonText="Go back"
+              setErrorModalValue={setErrorModalValue}
+            />
+            )}
+                       { !loadingComp && (errorModalValue) && (notPrivilidgedToken) &&
+           (<ErrorModal
+              text="Not a priviliged token"
+              body="You Dont Hold Elite NFT"
+              buttonText="Go back"
+              setErrorModalValue={setErrorModalValue}
+            />
+            )}
+                           {!loadingComp && (errorModalValue) && (mintingPriceCheck) &&
+           (<ErrorModal
+              text="Low Minting Price"
+              body="The Minting Price is Too Low"
+              buttonText="Go back"
+              setErrorModalValue={setErrorModalValue}
+            />
+            )}
+              {!hasMintedYet &&
+          !loadingComp &&
+          errorModalValue && (
+            <ErrorModal
+              text="Aleready minted!!"
+              body="You can mint only once"
+              buttonText="Go back"
+              setErrorModalValue={setErrorModalValue}
+            />
+          )}
+              {wrongTokenEntered &&
+          !loadingComp &&
+          errorModalValue && (
+            <ErrorModal
+              text="Aleready minted!!"
+              body="You can mint only once"
+              buttonText="Go back"
+              setErrorModalValue={setErrorModalValue}
+            />
+          )}
+
+                  <CircleLoader color="#CCD5E0" loading = {loadingComp} speedMultiplier = "3" id = "loader"/>
         <button className='login__submit' onClick={(e) => { e.preventDefault();mintingProcess()}}>submit</button>
       </form>
     </div>
