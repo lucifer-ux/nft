@@ -3,7 +3,7 @@ import smaple from '../resources/background.mp4'
 const VideoPlayer = () => {
   return (
     <>
-    <video className='videoTag' autoPlay loop muted
+    <video className='videoTag' playsInline autoPlay loop muted
     style={{
       position: "absolute",
       width: "100%",
