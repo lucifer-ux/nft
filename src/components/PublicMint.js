@@ -126,7 +126,7 @@ const PublicMint = () => {
       {transState != null && !loadingComp && errorModalValue && (
             <ErrorModal
               text="Transaction Status!!"
-              body = {linkFailure ? {transState} : "click below link to see transaction"}
+              body = {linkFailure ? transState : "click below link to see transaction"}
               buttonText={linkFailure ? "Go back" : "status"}
               setErrorModalValue={setErrorModalValue}
               link = {linkFailure ? "#" : transState}
