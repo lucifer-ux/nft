@@ -63,11 +63,6 @@
   margin: auto;
 }
 
-#button-disabled{
-background-color: rgb(97, 92, 104);
-color: black;
-}
-
 #button::before {
 content: '';
   border-radius: 1000px;
@@ -128,5 +123,9 @@ content: '';
     min-width: 150px;
     min-height: 40px;
     font-size: 12px;
+  }
+  #button::before {
+    min-width: calc(150px + 12px);
+    min-height: calc(40px + 12px);  
   }
 }

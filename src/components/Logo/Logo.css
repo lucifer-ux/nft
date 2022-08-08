@@ -19,12 +19,12 @@
     height: 100px;
     position: absolute;
     z-index: -1;
-    border: 2px solid rgb(0, 140, 255);
+    border: 2px solid rgba(24, 14, 13, 0.733);
     transition: all 0.25s ease-out;
     margin-left: 50px;
   }
   .wrap-image::before {
-    background-color: rgb(0, 140, 255);
+    background-color: rgba(24, 14, 13, 0.733);
     top: -15px;
     left: -15px;
     margin-left: 50px;
@@ -47,3 +47,17 @@
     margin-left: 50px;
 
   }
+  @media only screen and (max-width: 1250px){
+    .logo{
+      width: 60px;
+      height: 60px;
+    }
+    .wrap-image{
+      width: 60px;
+    }
+    .wrap-image::before, .wrap-image::after {
+      width: 60px;
+      height: 60px;  
+    }
+   }
+   

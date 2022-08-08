@@ -13,6 +13,7 @@ import VideoPlayer from './resources/VideoPlayer';
 const HomePage = (props) => {
   return (
       <>
+      <VideoPlayer/>
       <div className="bg"></div>
 <div className="bg bg2"></div>
 <div className="bg bg3"></div>  

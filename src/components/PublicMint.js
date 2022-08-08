@@ -133,9 +133,10 @@ const PublicMint = () => {
               linkFailure = {linkFailure}
             />
           )}
-            <CircleLoader color="#CCD5E0" loading = {loadingComp} speedMultiplier = "3" id = "loader"/>
       <div onClick={mintingProcess}>
-        <Button  buttonText="Public Mint" isButtonActive = {boolValue}/>
+      <CircleLoader color="#CCD5E0" loading = {loadingComp} speedMultiplier = "3" id = "loader"/>
+        <Button  buttonText="Public Mint" isButtonActive = {boolValue}>
+        </Button>
       </div>
     </div>
   );
