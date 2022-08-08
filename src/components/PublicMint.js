@@ -23,12 +23,6 @@ const PublicMint = () => {
     });
   }, [loadingComp]);
 
-  const ButtonEnalbled = () => {
-    console.log(boolValue)
-    return boolValue;
-
-  };
-
   const mintContract = async (contractBalance) => {
     const nftContract = createWriteContract();
     try {
@@ -137,7 +131,7 @@ const PublicMint = () => {
           )}
             <CircleLoader color="#CCD5E0" loading = {loadingComp} speedMultiplier = "3" id = "loader"/>
       <div onClick={mintingProcess}>
-        <Button  buttonText="Public Mint" isButtonActive = {()=> ButtonEnalbled}/>
+        <Button  buttonText="Public Mint" isButtonActive = {boolValue}/>
       </div>
     </div>
   );

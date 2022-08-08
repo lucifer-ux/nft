@@ -22,9 +22,6 @@ const GenerateReferal = (props) => {
   }, [loadingComp]);
 
   const Navigate = useNavigate();
-  const ButtonEnalbled = () => {
-    return boolValue;
-  };
   const initializeStates = async () => {
     setErrorModalValue(false)
     setIsEliteHolder(true)
@@ -96,7 +93,7 @@ let checkReturnValue = await CheckGenerateReferalMint(walletAddress, walletBalan
       </h1>
             <CircleLoader color="#CCD5E0" loading = {loadingComp} speedMultiplier = "3" id = "loader"/>
           <span onClick={mintingProcess}>
-        <Button buttonText="Generate Referal" isButtonActive = {()=> ButtonEnalbled}/>
+        <Button buttonText="Generate Referal" isButtonActive = {boolValue}/>
         </span>
     </div>    );
 };

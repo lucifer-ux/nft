@@ -22,9 +22,6 @@ const ReferralButton = (props) => {
   }, [loadingComp ]);
 
    const Navigate = useNavigate()
-  const ButtonEnalbled = () => {
-    return boolValue;
-  };
 
   const initializeStates = async () => {
     setErrorModalValue(false)
@@ -104,7 +101,7 @@ const ReferralButton = (props) => {
       </h1>
             <CircleLoader color="#CCD5E0" loading = {loadingComp} speedMultiplier = "3" id = "loader"/>
           <span onClick={mintingProcess}>
-        <Button buttonText="Referral Mint" isButtonActive = {() => ButtonEnalbled}/>
+        <Button buttonText="Referral Mint" isButtonActive = {boolValue}/>
         </span>
     </div>  
     );
