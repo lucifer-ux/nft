@@ -13,6 +13,7 @@ const PublicMint = () => {
   const [boolValue, setBoolValue] = useState(false);
   const [loadingComp, setLoadingComp] = useState(false);
   const [transState, setTransState] = useState(null);
+  const [linkFailure, setLinkFailure] = useState(false)
   const [errorModalValue, setErrorModalValue] = useState(false);
   const [hasMintedYet, setHasMintedYet] = useState(true)
   const [walletBalanceCheck, setWalletBalanceCheck] = useState(true)
@@ -34,6 +35,7 @@ const PublicMint = () => {
         `https://rinkeby.etherscan.io/tx/${nftTx.hash}`
       );
     } catch (error) {
+      setLinkFailure(true)
       console.log("Error minting", error, error.code);
       if(error.code === 4001)
       setTransState(error.message);
@@ -48,6 +50,7 @@ const PublicMint = () => {
     setTransState(null)
     setHasMintedYet(true)
     setWalletBalanceCheck(true)
+    setLinkFailure(false)
   }
 
   const mintingProcess = async () => {
@@ -86,12 +89,12 @@ const PublicMint = () => {
       console.log("low balance");
     }
     let checkReturnValue = (!hasmintedYet) && (!ethers.BigNumber.from(userBalance).lte(contractBalance));
+    console.log( "linkFailure",linkFailure)
     return { checkReturnValue, contractBalance};
   };
 
   window.ethereum.on("accountsChanged", accountChangeHandler);
   window.ethereum.on("chainChanged", chainChangedHandler);
-
   return (
     <div >
       {/* <h1>balance : {userBalance}</h1> wallet balance
@@ -123,10 +126,11 @@ const PublicMint = () => {
       {transState != null && !loadingComp && errorModalValue && (
             <ErrorModal
               text="Transaction Status!!"
-              body = "click below link to see transaction"
-              buttonText="status"
+              body = {linkFailure ? {transState} : "click below link to see transaction"}
+              buttonText={linkFailure ? "Go back" : "status"}
               setErrorModalValue={setErrorModalValue}
-              link = {transState}
+              link = {linkFailure ? "#" : transState}
+              linkFailure = {linkFailure}
             />
           )}
             <CircleLoader color="#CCD5E0" loading = {loadingComp} speedMultiplier = "3" id = "loader"/>

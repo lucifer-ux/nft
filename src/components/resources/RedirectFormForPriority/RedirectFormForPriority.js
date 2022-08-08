@@ -13,6 +13,7 @@ import CircleLoader from "react-spinners/CircleLoader";
   const [loadingComp, setLoadingComp] = useState(false);
   const [hasMintedYet, setHasMintedYet] = useState(true);
   const [referalCodeCheck, setReferalCodeCheck] = useState(null);
+  const [linkFailure, setLinkFailure] = useState(false)
 
   const handleChange = (value, key) => {
     setFormData({ ...formData, ...{ [key]: value } });
@@ -33,6 +34,7 @@ import CircleLoader from "react-spinners/CircleLoader";
     setTransState(null)
     setHasMintedYet(true)
     setReferalCodeCheck(null)
+    setLinkFailure(false)
   }
 
   const mintingProcess = async () => {
@@ -69,6 +71,7 @@ import CircleLoader from "react-spinners/CircleLoader";
         `https://rinkeby.etherscan.io/tx/${nftTx.hash}`
       );
     } catch (error) {
+      setLinkFailure(true)
       console.log("Error minting", error);
       if(error.code === 4001)
       setTransState(error.message);
@@ -137,13 +140,14 @@ import CircleLoader from "react-spinners/CircleLoader";
         {transState != null && !loadingComp && errorModalValue && (
             <ErrorModal
               text="Transaction Status!!"
-              body = "click below link to see transaction"
-              buttonText="status"
+              body = {linkFailure ? transState : "click below link to see transaction"}
+              buttonText={linkFailure ? "Go back" : "status"}
               setErrorModalValue={setErrorModalValue}
-              link = {transState}
+              link = {linkFailure ? "#" : transState}
+              linkFailure = {linkFailure}
             />
-
           )}
+
 
               <CircleLoader color="#CCD5E0" loading = {loadingComp} speedMultiplier = "3" id = "loader"/>
         <button className='login__submit' onClick={(e) => { e.preventDefault();mintingProcess()}}>submit</button>

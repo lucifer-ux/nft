@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { contractRead } from "../ReadContract";
 import { ethers } from "ethers";
 import {checkCorrectNetwork, ConnectWalletHandler, accountChangeHandler, chainChangedHandler} from "../../utilities/contract"
@@ -18,9 +18,21 @@ import CircleLoader from "react-spinners/CircleLoader";
   const [jsonData, setjsonData] = useState([])
   const [tokenArray, setTokenArray] = useState([])
 
+  useEffect(() => {
+    ConnectWalletHandler().then((res) => {
+      getPrivilegedTokens(res[0]).then((tokens) => {
+        setTokenArray(tokens)
+        console.log("elite cards", tokenArray)
+      });
+    });
+  }, [loadingComp]);
+
   const handleChange = (value, key) => {
     setFormData({ ...formData, ...{ [key]: value } });
+    console.log(value)
   }
+
+
   // get Privileged tokens
   const getPrivilegedTokens = async (defaultAccount) => {
     let privilegedTokens = []
@@ -93,8 +105,9 @@ import CircleLoader from "react-spinners/CircleLoader";
       checkReturnValue
     ) {
       setErrorModalValue(true)
+      let signatureCode = (await generateReferralCode(formData.walletAddress, formData.mintingPrice, parseInt(formData.tokenId))).signature
       setSignature((await generateReferralCode(formData.walletAddress, formData.mintingPrice, parseInt(formData.tokenId))).signature);
-      setjsonData(["walletAddress : "+formData.walletAddress, "mintingPrice : "+ formData.mintingPrice, "tokenId : " + parseInt(formData.tokenId), "signature : " + signature])
+      setjsonData(["walletAddress : "+formData.walletAddress, "\n mintingPrice : "+ formData.mintingPrice, "\n tokenId : " + parseInt(formData.tokenId), "\n referral code : " + signatureCode])
     }}
     else {console.log("error bro")}
     setLoadingComp(false)
@@ -142,16 +155,26 @@ import CircleLoader from "react-spinners/CircleLoader";
     <div className="login-container">
       <form className='form-login'>
         {generateFormElements.map(formElement => {
-        return <div>
+        return (
+        <div>
           <label className='login__label'>{formElement.label}</label>
-          <input className='login__input' value={formData[formElement.key]}
-            onChange={(e) => { 
-            handleChange(e.target.value, formElement.key) }}/>
-            <select className='login__input'>
-            {tokenArray.map((tokenValue)=> <option value={tokenValue}></option>)
-            }
-            </select>
-        <p
+          {formElement.key === "tokenId" ?
+              <select className="login__input" onClick={(e) => {
+                handleChange(e.target.value, formElement.key);
+              }}>
+                {tokenArray.map((val)=>{
+                 return <option value={val} >{val}</option>
+                })}
+              </select> 
+              : 
+              <input
+                className="login__input"
+                value={formData[formElement.key]}
+                onChange={(e) => {
+                  handleChange(e.target.value, formElement.key);
+                }}
+              />
+}        <p
           className={
             formElement.key === "tokenId" && wrongTokenEntered!==null 
               ? "visible"
@@ -178,7 +201,7 @@ import CircleLoader from "react-spinners/CircleLoader";
         >
           {mintingPriceCheck}
         </p>
-            </div>
+            </div>)
       })}
            {!loadingComp && (errorModalValue) && signature!=="" &&
            (<ErrorModal

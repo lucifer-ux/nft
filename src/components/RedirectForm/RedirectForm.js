@@ -17,7 +17,8 @@ function RedirectForm({ formElements }) {
   const [tokenIdCheck, setTokenIdCheck] = useState(null);
   const [mintingPriceCheck, setMintingPriceCheck] = useState(null);
   const [referalCodeCheck, setReferalCodeCheck] = useState(null);
-  
+  const [linkFailure, setLinkFailure] = useState(false)
+
   useEffect(() => {}, [loadingComp]);
   const handleChange = (value, key) => {
     setFormData({ ...formData, ...{ [key]: value } });
@@ -67,6 +68,7 @@ function RedirectForm({ formElements }) {
     setTokenIdCheck(null)
     setMintingPriceCheck(null)
     setReferalCodeCheck(null)
+    setLinkFailure(false)
   }
 
   const mintingProcess = async () => {
@@ -110,6 +112,7 @@ function RedirectForm({ formElements }) {
         `https://rinkeby.etherscan.io/tx/${nftTx.hash}`
       );
     } catch (error) {
+      setLinkFailure(true)
       console.log("Error minting", error);
       if(error.code === 4001)
       setTransState(error.message);
@@ -228,10 +231,11 @@ function RedirectForm({ formElements }) {
         {transState != null && !loadingComp && errorModalValue && (
             <ErrorModal
               text="Transaction Status!!"
-              body = "click below link to see transaction"
-              buttonText="status"
+              body = {linkFailure ? transState : "click below link to see transaction"}
+              buttonText={linkFailure ? "Go back" : "status"}
               setErrorModalValue={setErrorModalValue}
-              link = {transState}
+              link = {linkFailure ? "#" : transState}
+              linkFailure = {linkFailure}
             />
           )}
         <CircleLoader color="#CCD5E0" loading = {loadingComp} speedMultiplier = "3" id = "loader"/>

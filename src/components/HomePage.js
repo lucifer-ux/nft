@@ -19,7 +19,6 @@ const HomePage = (props) => {
     <div className='navbar'>
     <Logo className= "content"/>
     {/* background video with mute unmute feature */}
-    <Banner className = "content"/>
     </div>
     <div className='buttons'>
     {/* <VideoPlayer/> */}
