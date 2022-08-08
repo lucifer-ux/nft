@@ -11,7 +11,28 @@
     left: 50%;
     transform: translate(-50%, -50%);
   }
-  
+  .clipboard{
+    visibility: visible;
+    text-decoration: none;
+    color: black;
+  }
+  .no-clipboard{
+    visibility: hidden;
+  }
+  .button-copied{
+    width: 85px;
+    height: 45px;
+    background-color: black;
+    color: white;
+    justify-content: center;
+    align-items: center;
+    border: black;
+    border-radius: 10px;
+    margin-left: 200px;
+    cursor: pointer;
+    margin-top: 20px;
+    margin-bottom: 20px;
+  }
   .modalContainer {
     width: 500px;
     height: 500px;

@@ -1,12 +1,10 @@
 import React, { useState } from 'react';
 import { contractRead } from "../ReadContract";
 import { ethers } from "ethers";
-import createWriteContract from "../../createWriteContract";
 import {checkCorrectNetwork, ConnectWalletHandler, accountChangeHandler, chainChangedHandler} from "../../utilities/contract"
 import {generateReferralCode} from "./generateCode"
 import ErrorModal from '../../ErrorModal/ErrorModal';
 import CircleLoader from "react-spinners/CircleLoader";
-
 
  function RedirectFormForGenerate({generateFormElements}) {
   const [formData, setFormData] = useState({});
@@ -17,6 +15,8 @@ import CircleLoader from "react-spinners/CircleLoader";
   const [signature, setSignature] = useState("");
   const [loadingComp, setLoadingComp] = useState(false);
   const [isEliteHolder, setIsEliteHolder] = useState(true);
+  const [jsonData, setjsonData] = useState([])
+  const [tokenArray, setTokenArray] = useState([])
 
   const handleChange = (value, key) => {
     setFormData({ ...formData, ...{ [key]: value } });
@@ -36,6 +36,7 @@ import CircleLoader from "react-spinners/CircleLoader";
 
   const CheckGenerateReferalMint = async (defaultAccount, userBalance) => {
     let ownedPrivilegedTokenIDs = await getPrivilegedTokens(defaultAccount)
+    setTokenArray(ownedPrivilegedTokenIDs)
     let minReferralMintPrice = await contractRead.minReferralMintPrice();
     console.log("minReferralPrice: " + minReferralMintPrice);
     console.log(ownedPrivilegedTokenIDs[0])
@@ -93,6 +94,7 @@ import CircleLoader from "react-spinners/CircleLoader";
     ) {
       setErrorModalValue(true)
       setSignature((await generateReferralCode(formData.walletAddress, formData.mintingPrice, parseInt(formData.tokenId))).signature);
+      setjsonData(["walletAddress : "+formData.walletAddress, "mintingPrice : "+ formData.mintingPrice, "tokenId : " + parseInt(formData.tokenId), "signature : " + signature])
     }}
     else {console.log("error bro")}
     setLoadingComp(false)
@@ -145,6 +147,10 @@ import CircleLoader from "react-spinners/CircleLoader";
           <input className='login__input' value={formData[formElement.key]}
             onChange={(e) => { 
             handleChange(e.target.value, formElement.key) }}/>
+            <select className='login__input'>
+            {tokenArray.map((tokenValue)=> <option value={tokenValue}></option>)
+            }
+            </select>
         <p
           className={
             formElement.key === "tokenId" && wrongTokenEntered!==null 
@@ -177,9 +183,12 @@ import CircleLoader from "react-spinners/CircleLoader";
            {!loadingComp && (errorModalValue) && signature!=="" &&
            (<ErrorModal
               text="Success"
-              body={signature}
+              body="get the credentials by clicking below"
               buttonText="Go back"
               setErrorModalValue={setErrorModalValue}
+              transactionMessageDisplay = {true}
+              copyText = {jsonData}
+              copyButtonText = "Copy"
             />
             )}
                        { !loadingComp && (errorModalValue) && (!isEliteHolder) &&

@@ -37,6 +37,36 @@
   margin: auto;
 
   }
+.button-disabled{
+  min-width: 300px;
+  min-height: 60px;
+  font-family: 'Nunito', sans-serif;
+  font-size: 22px;
+  text-transform: uppercase;
+  letter-spacing: 1.3px;
+  font-weight: 700;
+  color: #121213;
+  background: #5e706e;
+  background: linear-gradient(90deg, rgb(74, 77, 85) 0%, rgb(106, 116, 115) 100%);
+  border: none;
+  border-radius: 20px;
+  box-shadow: 12px 12px 24px rgba(51, 177, 164, 0.64);
+  transition: all 0.3s ease-in-out 0s;
+  cursor: pointer;
+  outline: none;
+  position: relative;
+  padding: 10px;
+  top:0;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  margin: auto;
+}
+
+#button-disabled{
+background-color: rgb(97, 92, 104);
+color: black;
+}
 
 #button::before {
 content: '';

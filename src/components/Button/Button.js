@@ -1,18 +1,20 @@
-import React from 'react'
-import "./Button.css"
-
-
+import React from "react";
+import "./Button.css";
 
 const FancyButton = (props) => {
+  return (
+    <>
+      <div className="wrap">
+        <button
+          className={!props.isButtonActive ? "button-disabled" : "button"}
+          id="button"
+          disabled={!props.isButtonActive}
+        >
+          {props.buttonText}
+        </button>
+      </div>{" "}
+    </>
+  );
+};
 
-return(
-  <>
-<div className="wrap">
-  <button className="button" id='button'>{props.buttonText}</button>
-</div>  </>
-)
-
-}
-
-  
-    export default FancyButton
+export default FancyButton;

@@ -107,7 +107,7 @@ function RedirectForm({ formElements }) {
       });
       console.log("Mining....", nftTx.hash);
       setTransState(
-        `Mining, see transaction: https://rinkeby.etherscan.io/tx/${nftTx.hash}`
+        `https://rinkeby.etherscan.io/tx/${nftTx.hash}`
       );
     } catch (error) {
       console.log("Error minting", error);
@@ -226,14 +226,14 @@ function RedirectForm({ formElements }) {
           )}
         </h1>
         {transState != null && !loadingComp && errorModalValue && (
-          <ErrorModal
-            text="Transaction Status!!"
-            body={transState}
-            buttonText="Ok"
-            setErrorModalValue={setErrorModalValue}
-            link=""
-          />
-        )}
+            <ErrorModal
+              text="Transaction Status!!"
+              body = "click below link to see transaction"
+              buttonText="status"
+              setErrorModalValue={setErrorModalValue}
+              link = {transState}
+            />
+          )}
         <CircleLoader color="#CCD5E0" loading = {loadingComp} speedMultiplier = "3" id = "loader"/>
         <button
           className="login__submit"

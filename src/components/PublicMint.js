@@ -24,7 +24,9 @@ const PublicMint = () => {
   }, [loadingComp]);
 
   const ButtonEnalbled = () => {
+    console.log(boolValue)
     return boolValue;
+
   };
 
   const mintContract = async (contractBalance) => {
@@ -35,7 +37,7 @@ const PublicMint = () => {
       });
       console.log("Mining....", nftTx.hash);
       setTransState(
-        `Mining, see transaction: https://rinkeby.etherscan.io/tx/${nftTx.hash}`
+        `https://rinkeby.etherscan.io/tx/${nftTx.hash}`
       );
     } catch (error) {
       console.log("Error minting", error, error.code);
@@ -127,15 +129,15 @@ const PublicMint = () => {
       {transState != null && !loadingComp && errorModalValue && (
             <ErrorModal
               text="Transaction Status!!"
-              body = {transState}
-              buttonText="Ok"
+              body = "click below link to see transaction"
+              buttonText="status"
               setErrorModalValue={setErrorModalValue}
-              link = ""
+              link = {transState}
             />
           )}
             <CircleLoader color="#CCD5E0" loading = {loadingComp} speedMultiplier = "3" id = "loader"/>
       <div onClick={mintingProcess}>
-        <Button  buttonText="Public Mint" />
+        <Button  buttonText="Public Mint" isButtonActive = {()=> ButtonEnalbled}/>
       </div>
     </div>
   );
