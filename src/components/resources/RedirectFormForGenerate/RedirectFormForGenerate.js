@@ -144,14 +144,21 @@ import CircleLoader from "react-spinners/CircleLoader";
         {generateFormElements.map(formElement => {
         return <div>
           <label className='login__label'>{formElement.label}</label>
-          <input className='login__input' value={formData[formElement.key]}
-            onChange={(e) => { 
-            handleChange(e.target.value, formElement.key) }}/>
-            <select className='login__input'>
-            {tokenArray.map((tokenValue)=> <option value={tokenValue}></option>)
-            }
-            </select>
-        <p
+          {formElement.key === "tokenId" ?
+              <select className="login__input">
+                {tokenArray.map((val)=>{
+                 return <option value={val} >{val}</option>
+                })}
+              </select> 
+              : 
+              <input
+                className="login__input"
+                value={formData[formElement.key]}
+                onChange={(e) => {
+                  handleChange(e.target.value, formElement.key);
+                }}
+              />
+}        <p
           className={
             formElement.key === "tokenId" && wrongTokenEntered!==null 
               ? "visible"

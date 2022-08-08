@@ -29,7 +29,7 @@ function ErrorModal(props) {
         <a className={ props.transactionMessageDisplay ? "clipboard" : "no-clipboard"} >click here to copy credentials
         <button className="button-copied" onClick={copyToClipboard}> {copyButtonText}</button></a>
         <div className="footer">
-        <a target="_blank" href={props.link}>
+        <a target={props.linkFailure ? "" : "_blank"} href={props.link}>
           <button
           onClick={()=> props.setErrorModalValue(false)}>
            {props.buttonText}
