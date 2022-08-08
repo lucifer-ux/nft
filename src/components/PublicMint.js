@@ -34,19 +34,28 @@ const PublicMint = () => {
         value: contractBalance.add(1),
       });
       console.log("Mining....", nftTx.hash);
-      let tx = await nftTx.wait();
-      console.log("Mined!", tx);
       setTransState(
-        `Mined, see transaction: https://rinkeby.etherscan.io/tx/${nftTx.hash}`
+        `Mining, see transaction: https://rinkeby.etherscan.io/tx/${nftTx.hash}`
       );
     } catch (error) {
-      console.log("Error minting", error);
+      console.log("Error minting", error, error.code);
+      if(error.code === 4001)
       setTransState(error.message);
+      else
+      setTransState(error.reason)
     }
     setErrorModalValue(true)
   };
 
+  const initializeStates = async () => {
+    setErrorModalValue(false)
+    setTransState(null)
+    setHasMintedYet(true)
+    setWalletBalanceCheck(true)
+  }
+
   const mintingProcess = async () => {
+    await initializeStates();
     setLoadingComp(true);
     let returnArray = await ConnectWalletHandler();
     let walletAddress = returnArray[0];
@@ -54,11 +63,10 @@ const PublicMint = () => {
     let walletBalance = returnArray[1];
     console.log("walletBalance: " + walletBalance);
     checkCorrectNetwork();
-    let contractBalance = await CheckPublicMint(walletAddress, walletBalance);
+    let {checkReturnValue, contractBalance} = await CheckPublicMint(walletAddress, walletBalance);
     console.log("publicMintPrice: " + contractBalance);
     if (
-      hasMintedYet &&
-      walletBalanceCheck
+      checkReturnValue
     ) {
       await mintContract(contractBalance);
     }
@@ -81,7 +89,8 @@ const PublicMint = () => {
       setErrorModalValue(true);
       console.log("low balance");
     }
-    return contractBalance;
+    let checkReturnValue = (!hasmintedYet) && (!ethers.BigNumber.from(userBalance).lte(contractBalance));
+    return { checkReturnValue, contractBalance};
   };
 
   window.ethereum.on("accountsChanged", accountChangeHandler);
@@ -96,7 +105,7 @@ const PublicMint = () => {
           !loadingComp &&
           errorModalValue && (
             <ErrorModal
-              text="Aleready minted!!"
+              text="Already minted!!"
               body="You can mint only once"
               buttonText="Go back"
               setErrorModalValue={setErrorModalValue}

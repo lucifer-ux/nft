@@ -7,13 +7,13 @@ import ErrorModal from "./ErrorModal/ErrorModal";
 import { useNavigate } from "react-router-dom";
 import CircleLoader from "react-spinners/CircleLoader";
 import "../App.css"
-import booleanCheckValuesForGenerateReferal from "./resources/booleanCheckValuesForGenerateReferal"
 import {checkCorrectNetwork, ConnectWalletHandler, accountChangeHandler, chainChangedHandler} from "./utilities/contract"
 
 const GenerateReferal = (props) => {
   const [boolValue, setBoolValue] = useState(false);
   const [loadingComp, setLoadingComp] = useState(false);
   const [errorModalValue, setErrorModalValue] = useState(false);
+  const [isEliteHolder, setIsEliteHolder] = useState(true);
 
   useEffect(() => {
     contractRead.isReferralMintLive().then((res) => {
@@ -25,8 +25,12 @@ const GenerateReferal = (props) => {
   const ButtonEnalbled = () => {
     return boolValue;
   };
-
+  const initializeStates = async () => {
+    setErrorModalValue(false)
+    setIsEliteHolder(true)
+  }
   const mintingProcess = async () => {
+    await initializeStates();
     setLoadingComp(true);
     let returnArray = await ConnectWalletHandler();
     let walletAddress = returnArray[0];
@@ -34,9 +38,9 @@ const GenerateReferal = (props) => {
     let walletBalance = returnArray[1];
     console.log("walletBalance: " + walletBalance);
     checkCorrectNetwork();
-await CheckGenerateReferalMint(walletAddress, walletBalance);
+let checkReturnValue = await CheckGenerateReferalMint(walletAddress, walletBalance);
     if (
-      booleanCheckValuesForGenerateReferal.isPrivilegedTokenHolder
+      checkReturnValue
     ) {
       props.setState(true);
       Navigate('/formGenerate');
@@ -63,10 +67,12 @@ await CheckGenerateReferalMint(walletAddress, walletBalance);
 
 
     if (ownedPrivilegedTokenIDs.length === 0) {
-      booleanCheckValuesForGenerateReferal.isPrivilegedTokenHolder = false;
+      setIsEliteHolder(false);
       setErrorModalValue(true);
       console.log("You Don't Hold Privileged Tokens");
     }
+
+    return !(ownedPrivilegedTokenIDs.length === 0);
   };
 
   window.ethereum.on("accountsChanged", accountChangeHandler);
@@ -77,7 +83,7 @@ await CheckGenerateReferalMint(walletAddress, walletBalance);
       {/* <h1>balance : {userBalance}</h1> wallet balance
       <h1>account : {defaultAccount}</h1> wallet address */}
       <h1>
-        {!booleanCheckValuesForGenerateReferal.isPrivilegedTokenHolder &&
+        {!isEliteHolder &&
           !loadingComp &&
           errorModalValue && (
             <ErrorModal

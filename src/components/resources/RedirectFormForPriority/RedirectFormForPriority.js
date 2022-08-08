@@ -12,12 +12,10 @@ import CircleLoader from "react-spinners/CircleLoader";
   const [errorModalValue, setErrorModalValue] = useState(false);
   const [loadingComp, setLoadingComp] = useState(false);
   const [hasMintedYet, setHasMintedYet] = useState(true);
-  const [walletBalanceCheck, setWalletBalanceCheck] = useState(true);
-  const [referalCodeCheck, setReferalCodeCheck] = useState(true);
+  const [referalCodeCheck, setReferalCodeCheck] = useState(null);
 
   const handleChange = (value, key) => {
     setFormData({ ...formData, ...{ [key]: value } });
-    setReferalCodeCheck(/^0x[a-f0-9]{130}$/.test(formData.referalCode));
   }
 
   const CheckPriorityMint = async (defaultAccount, userBalance) => {
@@ -30,7 +28,15 @@ import CircleLoader from "react-spinners/CircleLoader";
     return !hasmintedYet
   };
 
+  const initializeStates = async () => {
+    setErrorModalValue(false)
+    setTransState(null)
+    setHasMintedYet(true)
+    setReferalCodeCheck(null)
+  }
+
   const mintingProcess = async () => {
+    await initializeStates();
     setLoadingComp(true)
     if(!( await isFormInValid()))
     {let returnArray = await ConnectWalletHandler();
@@ -59,14 +65,15 @@ import CircleLoader from "react-spinners/CircleLoader";
         value: 1,
       });
       console.log("Mining....", nftTx.hash);
-      let tx = await nftTx.wait();
-      console.log("Mined!", tx);
       setTransState(
-        `Mined, see transaction: https://rinkeby.etherscan.io/tx/${nftTx.hash}`
+        `Mining, see transaction: https://rinkeby.etherscan.io/tx/${nftTx.hash}`
       );
     } catch (error) {
       console.log("Error minting", error);
+      if(error.code === 4001)
       setTransState(error.message);
+      else
+      setTransState(error.reason)
     }
     setErrorModalValue(true)
   };
@@ -78,10 +85,21 @@ import CircleLoader from "react-spinners/CircleLoader";
     let returnValue = false;
     priorityFormElements.forEach(priorityFormElements => {
       if (formData[priorityFormElements.key] === undefined || formData[priorityFormElements.key] === "" ) {// regex, tokein id integer, mintPrice should be float value, referal code regex check
-        alert(priorityFormElements.label + " is Missing");
-        returnValue = true
+        if(priorityFormElements.key === "referalCode"){
+          setReferalCodeCheck(priorityFormElements.label + " is Missing")
+          console.log(priorityFormElements.label + " is Missing")
+        }
+        returnValue = true;
       }
     })
+    if (returnValue)
+     return returnValue;
+
+    if(!/^0x[a-f0-9]{130}$/.test(formData.referalCode)) {
+      setReferalCodeCheck(/^0x[a-f0-9]{130}$/.test(formData.referalCode)?null:"Invalid Referral code Format");
+      console.log(/^0x[a-f0-9]{130}$/.test(formData.referalCode)?null:"Invalid Referral code Format")
+      returnValue = true
+    }
     return returnValue
   }
 
@@ -94,32 +112,23 @@ import CircleLoader from "react-spinners/CircleLoader";
           <input className='login__input' value={formData[priorityFormElements.key]}
             onChange={(e) => { 
             handleChange(e.target.value, priorityFormElements.key) }}/>
-            </div>
+
+          <p
+            className={
+              priorityFormElements.key === "referalCode" && referalCodeCheck!==null
+                ? "visible"
+                : "gone"
+            }
+          >
+            {referalCodeCheck}
+          </p>
+        </div>
       })}
-              <p
-                className={
-                !referalCodeCheck 
-                    ? "visible"
-                    : "gone"
-                }
-              >
-                Wrong Credential
-              </p>
               <h1>
           {!hasMintedYet && !loadingComp && errorModalValue && (
             <ErrorModal
-              text="Aleready minted!!"
+              text="Already minted!!"
               body="You can mint only once"
-              buttonText="Go back"
-              setErrorModalValue={setErrorModalValue}
-            />
-          )}
-        </h1>
-        <h1>
-          {!walletBalanceCheck && !loadingComp && errorModalValue && (
-            <ErrorModal
-              text="Low Wallet Balance!!"
-              body="You dont have what it takes to become a chad"
               buttonText="Go back"
               setErrorModalValue={setErrorModalValue}
             />

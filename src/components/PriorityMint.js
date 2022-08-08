@@ -13,7 +13,6 @@ const PriorityButton = (props) => {
   const [loadingComp, setLoadingComp] = useState(false);
   const [errorModalValue, setErrorModalValue] = useState(false);
   const [hasMintedYet, setHasMintedYet] = useState(true);
-  const [walletBalanceCheck, setWalletBalanceCheck] = useState(true);
 
   useEffect(() => {
   }, [loadingComp ]);
@@ -21,8 +20,13 @@ const PriorityButton = (props) => {
   const ButtonEnalbled = () => {
     return true;
   };
+  const initializeStates = async () => {
+    setErrorModalValue(false)
+    setHasMintedYet(true)
+  }
 
   const mintingProcess = async () => {
+    await initializeStates();
     setLoadingComp(true);
     let returnArray = await ConnectWalletHandler();
     let walletAddress = returnArray[0];
@@ -30,8 +34,8 @@ const PriorityButton = (props) => {
     let walletBalance = returnArray[1];
     console.log("walletBalance: " + walletBalance);
     checkCorrectNetwork();
-    await CheckPriorityMint(walletAddress, walletBalance);
-    if( hasMintedYet ) {
+    let checkReturnValue = await CheckPriorityMint(walletAddress, walletBalance);
+    if( checkReturnValue ) {
       Navigate('/formPriority')
       props.setState(true)
     }
@@ -48,6 +52,7 @@ const PriorityButton = (props) => {
       setErrorModalValue(true);
       console.log("already minted");
     }
+    return (!hasmintedYet)
   };
 
   window.ethereum.on("accountsChanged", accountChangeHandler);
@@ -61,7 +66,7 @@ const PriorityButton = (props) => {
           !loadingComp &&
           errorModalValue && (
             <ErrorModal
-              text="Aleready minted!!"
+              text="Already minted!!"
               body="You can mint only once"
               buttonText="Go back"
               setErrorModalValue={setErrorModalValue}

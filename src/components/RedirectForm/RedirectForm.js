@@ -3,6 +3,7 @@ import "./RedirectForm.css";
 import { contractRead } from "../resources/ReadContract";
 import { ethers } from "ethers";
 import createWriteContract from "../createWriteContract";
+import CircleLoader from "react-spinners/CircleLoader";
 import ErrorModal from "../ErrorModal/ErrorModal";
 import {checkCorrectNetwork, ConnectWalletHandler, accountChangeHandler, chainChangedHandler} from "../utilities/contract"
 
@@ -13,14 +14,13 @@ function RedirectForm({ formElements }) {
   const [loadingComp, setLoadingComp] = useState(false);
   const [hasMintedYet, setHasMintedYet] = useState(true);
   const [walletBalanceCheck, setWalletBalanceCheck] = useState(true);
-  const [tokenIdCheck, setTokenIdCheck] = useState(true);
-  const [referalCodeCheck, setReferalCodeCheck] = useState(true);
+  const [tokenIdCheck, setTokenIdCheck] = useState(null);
+  const [mintingPriceCheck, setMintingPriceCheck] = useState(null);
+  const [referalCodeCheck, setReferalCodeCheck] = useState(null);
   
   useEffect(() => {}, [loadingComp]);
   const handleChange = (value, key) => {
     setFormData({ ...formData, ...{ [key]: value } });
-    setTokenIdCheck(Number.isInteger(parseInt(formData.tokenId)));
-    setReferalCodeCheck(/^0x[a-f0-9]{130}$/.test(formData.referalCode));
   };
 
   const CheckReferralMintForm = async (defaultAccount, userBalance) => {
@@ -37,21 +37,21 @@ function RedirectForm({ formElements }) {
 
       console.log("already minted");
       setHasMintedYet(false)
-      alert("already minted");
+      setErrorModalValue(true);
     }
     if (MintingPriceLessThanMinReferralMintPrice) {
       console.log("low minting price");
-      alert("low minting price")
-      setWalletBalanceCheck(false);
+      setMintingPriceCheck("low minting price");
     }
     if(!isTokenPrivileged){
       console.log("token  ID not privileged")
-      alert("token  ID not privileged")
+      setTokenIdCheck("token  ID not privileged")
     }
 
     if(BalanceLessThanMintingPrice){
       console.log("low balance")
-      alert("low balance")
+      setWalletBalanceCheck(false);
+      setErrorModalValue(true);
     }
 
     return (!hasmintedYetValue) && (!MintingPriceLessThanMinReferralMintPrice) && isTokenPrivileged && (!BalanceLessThanMintingPrice);
@@ -59,7 +59,18 @@ function RedirectForm({ formElements }) {
 
   };
 
+  const initializeStates = async () => {
+    setErrorModalValue(false)
+    setTransState(null)
+    setHasMintedYet(true)
+    setWalletBalanceCheck(true)
+    setTokenIdCheck(null)
+    setMintingPriceCheck(null)
+    setReferalCodeCheck(null)
+  }
+
   const mintingProcess = async () => {
+    await initializeStates();
     setLoadingComp(true);
     console.log(formData);
     if (!(await isFormInValid())) {
@@ -82,6 +93,7 @@ function RedirectForm({ formElements }) {
       console.log("error bro");
     }
     setLoadingComp(false);
+    console.log("minting Price Set", mintingPriceCheck)
   };
 
   const mintContract = async () => {
@@ -94,14 +106,15 @@ function RedirectForm({ formElements }) {
         value: ethers.utils.parseEther(formData.mintingPrice).add(1),
       });
       console.log("Mining....", nftTx.hash);
-      let tx = await nftTx.wait();
-      console.log("Mined!", tx);
       setTransState(
-        `Mined, see transaction: https://rinkeby.etherscan.io/tx/${nftTx.hash}`
+        `Mining, see transaction: https://rinkeby.etherscan.io/tx/${nftTx.hash}`
       );
     } catch (error) {
       console.log("Error minting", error);
+      if(error.code === 4001)
       setTransState(error.message);
+      else
+      setTransState(error.reason)
     }
     setErrorModalValue(true);
   };
@@ -117,17 +130,31 @@ function RedirectForm({ formElements }) {
         formData[formElement.key] === undefined ||
         formData[formElement.key] === ""
       ) {
-        alert(formElement.label + " is Missing");
+        if(formElement.key === "tokenId")
+        {setTokenIdCheck(formElement.label + " is Missing");
+        }
+        if(formElement.key === "mintingPrice")
+        {setMintingPriceCheck(formElement.label + " is Missing")}
+
+        if(formElement.key === "referalCode"){
+          setReferalCodeCheck(formElement.label + " is Missing")
+        }
         returnValue = true;
       }
     });
+    if (returnValue)
+     return returnValue;
     if (!Number.isInteger(parseInt(formData.tokenId))) {
-      alert("tokenId should be Integer");
+      setTokenIdCheck(Number.isInteger(parseInt(formData.tokenId))?null:"tokenId should be Integer");
+
       returnValue = true;
     }
+    if(!/^0x[a-f0-9]{130}$/.test(formData.referalCode)) {
+      setReferalCodeCheck(/^0x[a-f0-9]{130}$/.test(formData.referalCode)?null:"Invalid Referral code Format");
+      returnValue = true
+    }
     if(Number.isNaN(parseFloat(formData.mintingPrice))) {
-      
-      alert("minting Price should be in float")
+      setMintingPriceCheck(!Number.isNaN(parseFloat(formData.mintingPrice))?null:"minting Price should be in float");
       returnValue = true;
     }
 
@@ -150,21 +177,30 @@ function RedirectForm({ formElements }) {
               />
               <p
                 className={
-                  formElement.key === "tokenId" && !tokenIdCheck 
+                  formElement.key === "tokenId" && tokenIdCheck!==null 
                     ? "visible"
                     : "gone"
                 }
               >
-                Wrong Credential
+                {tokenIdCheck}
               </p>
               <p
                 className={
-                  formElement.key === "referalCode" && !referalCodeCheck && formData["referalCode"] != ""
+                  formElement.key === "referalCode" && referalCodeCheck!==null
                     ? "visible"
                     : "gone"
                 }
               >
-                Wrong Credential
+                {referalCodeCheck}
+              </p>
+              <p
+                className={
+                  formElement.key === "mintingPrice" && mintingPriceCheck!==null
+                    ? "visible"
+                    : "gone"
+                }
+              >
+                {mintingPriceCheck}
               </p>
             </div>
           );
@@ -172,7 +208,7 @@ function RedirectForm({ formElements }) {
         <h1>
           {!hasMintedYet && !loadingComp && errorModalValue && (
             <ErrorModal
-              text="Aleready minted!!"
+              text="Already minted!!"
               body="You can mint only once"
               buttonText="Go back"
               setErrorModalValue={setErrorModalValue}
@@ -198,7 +234,7 @@ function RedirectForm({ formElements }) {
             link=""
           />
         )}
-
+        <CircleLoader color="#CCD5E0" loading = {loadingComp} speedMultiplier = "3" id = "loader"/>
         <button
           className="login__submit"
           onClick={(e) => {

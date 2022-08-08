@@ -26,7 +26,13 @@ const ReferralButton = (props) => {
     return boolValue;
   };
 
+  const initializeStates = async () => {
+    setErrorModalValue(false)
+    setHasMintedYet(true)
+    setWalletBalanceCheck(true)
+  }
   const mintingProcess = async () => {
+    await initializeStates();
     setLoadingComp(true);
     let returnArray = await ConnectWalletHandler();
     let walletAddress = returnArray[0];
@@ -34,9 +40,9 @@ const ReferralButton = (props) => {
     let walletBalance = returnArray[1];
     console.log("walletBalance: " + walletBalance);
     checkCorrectNetwork();
-    let contractBalance =  await CheckReferralMint(walletAddress, walletBalance);
+    let {checkReturnValue, contractBalance} =  await CheckReferralMint(walletAddress, walletBalance);
     console.log("minReferralMintPrice:"+ contractBalance._hex);
-    if( walletBalanceCheck && hasMintedYet ) {
+    if( checkReturnValue ) {
       props.setState(true)
       Navigate('/form')}
     setLoadingComp(false);
@@ -60,7 +66,8 @@ const ReferralButton = (props) => {
       setErrorModalValue(true);
       console.log("low balance");
     }
-    return contractBalance
+    let checkReturnValue = (!hasmintedYet) && (!ethers.BigNumber.from(userBalance).lte(contractBalance));
+    return { checkReturnValue, contractBalance};
   };
 
   window.ethereum.on("accountsChanged", accountChangeHandler);
@@ -76,7 +83,7 @@ const ReferralButton = (props) => {
           !loadingComp &&
           errorModalValue && (
             <ErrorModal
-              text="Aleready minted!!"
+              text="Already minted!!"
               body="You can mint only once"
               buttonText="Go back"
               setErrorModalValue={setErrorModalValue}

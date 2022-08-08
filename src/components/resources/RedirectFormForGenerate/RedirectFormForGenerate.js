@@ -11,12 +11,12 @@ import CircleLoader from "react-spinners/CircleLoader";
  function RedirectFormForGenerate({generateFormElements}) {
   const [formData, setFormData] = useState({});
   const [wrongTokenEntered, setWrongTokenEntered] = useState(null);
-  const [hasMintedYet, setHasMintedYet] = useState(true);
-  const [mintingPriceCheck, setMintingPriceCheck] = useState(true);
+  const [hasMintedYet, setHasMintedYet] = useState(null);
+  const [mintingPriceCheck, setMintingPriceCheck] = useState(null);
   const [errorModalValue,setErrorModalValue] = useState(false);
   const [signature, setSignature] = useState("");
   const [loadingComp, setLoadingComp] = useState(false);
-  const [notPrivilidgedToken,setNotPrivilidgedToken ] = useState(false)
+  const [isEliteHolder, setIsEliteHolder] = useState(true);
 
   const handleChange = (value, key) => {
     setFormData({ ...formData, ...{ [key]: value } });
@@ -47,29 +47,38 @@ import CircleLoader from "react-spinners/CircleLoader";
 
     if (ownedPrivilegedTokenIDs.length === 0) {
       console.log("You Don't Hold Elite NFT");
-      setNotPrivilidgedToken(true)
+      setIsEliteHolder(false);
+      setErrorModalValue(true);
     }
 
     if (MintingPriceLessThanMinReferralMintPrice) {
-      setMintingPriceCheck(true)
+      setMintingPriceCheck("low minting price")
       console.log("low minting price");
     }
 
     if(!ifRightTokenEntered) {
       console.log("This is not an owned Elite NFT")
-      alert("This is not an owned Elite NFT")
-      setWrongTokenEntered(true)
+      setWrongTokenEntered("This is not an owned Elite NFT")
     }
 
     if(AddressHasMinted) {
-      setHasMintedYet(true)
+      setHasMintedYet("This address has already minted")
       console.log("This address has already minted")
     }
     return (ownedPrivilegedTokenIDs.length > 0) && ifRightTokenEntered && (!MintingPriceLessThanMinReferralMintPrice) && (!AddressHasMinted);
   };
 
+  const initializeStates = async () => {
+    setErrorModalValue(false)
+    setIsEliteHolder(true)
+    setHasMintedYet(null)
+    setSignature("")
+    setWrongTokenEntered(null)
+    setMintingPriceCheck(null)
+  }
 
   const mintingProcess = async () => {
+    await initializeStates();
     setLoadingComp(true)
     if(!( await isFormInValid()))
     {let returnArray = await ConnectWalletHandler();
@@ -96,22 +105,32 @@ import CircleLoader from "react-spinners/CircleLoader";
     let returnValue = false;
     generateFormElements.forEach(formElement => {
       if (formData[formElement.key] === undefined || formData[formElement.key] === "" ) {// regex, tokein id integer, mintPrice should be float value, referal code regex check
-        alert(formElement.label + " is Missing");
-        returnValue = true
+        if(formElement.key === "tokenId")
+        {setWrongTokenEntered(formElement.label + " is Missing");
+        }
+        if(formElement.key === "mintingPrice")
+        {setMintingPriceCheck(formElement.label + " is Missing")}
+
+        if(formElement.key === "walletAddress"){
+          setHasMintedYet(formElement.label + " is Missing")
+        }
+        returnValue = true;
       }
     })
+    if (returnValue)
+     return returnValue;
     const test = /^0x[a-fA-F0-9]{40}$/.test(formData.walletAddress);
     if(!test) { 
-      alert("invalid wallet address")
+      setHasMintedYet("invalid wallet address")
       returnValue = true
     }
     if (!Number.isInteger(parseInt(formData.tokenId))) {
-      alert("tokenId should be Integer");
+      setWrongTokenEntered("tokenId should be Integer");
       returnValue = true;
     }
     if(Number.isNaN(parseFloat(formData.mintingPrice))) {
       
-      alert("minting Price should be in float")
+      setMintingPriceCheck("minting Price should be in float")
       returnValue = true;
     }
     return returnValue
@@ -126,9 +145,36 @@ import CircleLoader from "react-spinners/CircleLoader";
           <input className='login__input' value={formData[formElement.key]}
             onChange={(e) => { 
             handleChange(e.target.value, formElement.key) }}/>
+        <p
+          className={
+            formElement.key === "tokenId" && wrongTokenEntered!==null 
+              ? "visible"
+              : "gone"
+          }
+        >
+          {wrongTokenEntered}
+        </p>
+        <p
+          className={
+            formElement.key === "walletAddress" && hasMintedYet!==null 
+              ? "visible"
+              : "gone"
+          }
+        >
+          {hasMintedYet}
+        </p>
+        <p
+          className={
+            formElement.key === "mintingPrice" && mintingPriceCheck!==null 
+              ? "visible"
+              : "gone"
+          }
+        >
+          {mintingPriceCheck}
+        </p>
             </div>
       })}
-           {!loadingComp && (errorModalValue) &&
+           {!loadingComp && (errorModalValue) && signature!=="" &&
            (<ErrorModal
               text="Success"
               body={signature}
@@ -136,7 +182,7 @@ import CircleLoader from "react-spinners/CircleLoader";
               setErrorModalValue={setErrorModalValue}
             />
             )}
-                       { !loadingComp && (errorModalValue) && (notPrivilidgedToken) &&
+                       { !loadingComp && (errorModalValue) && (!isEliteHolder) &&
            (<ErrorModal
               text="Not a priviliged token"
               body="You Dont Hold Elite NFT"
@@ -144,34 +190,6 @@ import CircleLoader from "react-spinners/CircleLoader";
               setErrorModalValue={setErrorModalValue}
             />
             )}
-                           {!loadingComp && (errorModalValue) && (mintingPriceCheck) &&
-           (<ErrorModal
-              text="Low Minting Price"
-              body="The Minting Price is Too Low"
-              buttonText="Go back"
-              setErrorModalValue={setErrorModalValue}
-            />
-            )}
-              {!hasMintedYet &&
-          !loadingComp &&
-          errorModalValue && (
-            <ErrorModal
-              text="Aleready minted!!"
-              body="You can mint only once"
-              buttonText="Go back"
-              setErrorModalValue={setErrorModalValue}
-            />
-          )}
-              {wrongTokenEntered &&
-          !loadingComp &&
-          errorModalValue && (
-            <ErrorModal
-              text="Aleready minted!!"
-              body="You can mint only once"
-              buttonText="Go back"
-              setErrorModalValue={setErrorModalValue}
-            />
-          )}
 
                   <CircleLoader color="#CCD5E0" loading = {loadingComp} speedMultiplier = "3" id = "loader"/>
         <button className='login__submit' onClick={(e) => { e.preventDefault();mintingProcess()}}>submit</button>
