@@ -23,10 +23,10 @@ const HomePage = (props) => {
     </div>
     <div className='buttons'>
     {/* <VideoPlayer/> */}
-      <ReferralButton className="content" setState = {props.setState}/>
-      <DirectButton className="content"/>
       <PriorityButton className="content" setState = {props.setState}/>
       <GenerateReferal className="content" setState = {props.setState}/>
+      <ReferralButton className="content" setState = {props.setState}/>
+      <DirectButton className="content"/>
     </div>
     <Card className="content"/>
     <span className="flexBox">

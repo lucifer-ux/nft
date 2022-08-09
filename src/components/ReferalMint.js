@@ -104,7 +104,7 @@ const ReferralButton = (props) => {
       </h1>
             <CircleLoader color="#CCD5E0" loading = {loadingComp} speedMultiplier = "3" id = "loader"/>
           <span onClick={mintingProcess}>
-        <Button buttonText="Referral Mint" isButtonActive = {boolValue}/>
+        <Button buttonText="Alpha Chad R2E Mint" isButtonActive = {boolValue}/>
         </span>
     </div>  
     );

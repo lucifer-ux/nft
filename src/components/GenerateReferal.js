@@ -96,7 +96,7 @@ let checkReturnValue = await CheckGenerateReferalMint(walletAddress, walletBalan
       </h1>
             <CircleLoader color="#CCD5E0" loading = {loadingComp} speedMultiplier = "3" id = "loader"/>
           <span onClick={mintingProcess}>
-        <Button buttonText="Generate Referal" isButtonActive = {boolValue}/>
+        <Button buttonText="Create Referral Code" isButtonActive = {boolValue}/>
         </span>
     </div>    );
 };

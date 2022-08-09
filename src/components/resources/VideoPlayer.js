@@ -13,7 +13,7 @@ const VideoPlayer = () => {
       objectFit: "cover",
       transform: "translate(-50%,-50%)",
       zIndex: "-1",
-      opacity: "0.2"
+      opacity: "0.45"
     }}
     >
     <source src={smaple} type='video/mp4' />

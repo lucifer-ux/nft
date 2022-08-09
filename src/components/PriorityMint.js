@@ -78,7 +78,7 @@ const PriorityButton = (props) => {
       </h1>
       <CircleLoader color="#CCD5E0" loading = {loadingComp} speedMultiplier = "3" id = "loader"/>
           <span onClick={mintingProcess}>
-        <Button buttonText="Priority Mint" isButtonActive = {ButtonEnalbled()}/>
+        <Button buttonText="Elite Chad Mint" isButtonActive = {ButtonEnalbled()}/>
         </span>
     </div>    );
 };

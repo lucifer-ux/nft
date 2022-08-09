@@ -138,7 +138,7 @@ const PublicMint = () => {
           )}
       <div onClick={mintingProcess}>
       <CircleLoader color="#CCD5E0" loading = {loadingComp} speedMultiplier = "3" id = "loader"/>
-        <Button  buttonText="Public Mint" isButtonActive = {boolValue}>
+        <Button  buttonText="Alpha Chad Public Mint" isButtonActive = {boolValue}>
         </Button>
       </div>
     </div>
