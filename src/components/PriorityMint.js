@@ -1,4 +1,5 @@
 import React from "react";
+import detectEthereumProvider from '@metamask/detect-provider';
 import Button from "./Button/Button";
 import { useState, useEffect } from "react";
 import { ethers } from "ethers";
@@ -55,8 +56,10 @@ const PriorityButton = (props) => {
     return (!hasmintedYet)
   };
 
-  window.ethereum.on("accountsChanged", accountChangeHandler);
-  window.ethereum.on("chainChanged", chainChangedHandler);
+  detectEthereumProvider().then((provider) => {
+    provider.on("accountsChanged", accountChangeHandler);
+    provider.on("chainChanged", chainChangedHandler);
+  });
 
 
   return (

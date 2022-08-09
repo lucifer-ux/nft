@@ -1,14 +1,17 @@
 import { ethers } from 'ethers';
+import detectEthereumProvider from '@metamask/detect-provider';
+
 export const checkCorrectNetwork = async () => {
-    if (window.ethereum.networkVersion !== parseInt(process.env.REACT_APP_CHAIN_ID)) {
+  const provider = await detectEthereumProvider();
+    if (provider.networkVersion !== parseInt(process.env.REACT_APP_CHAIN_ID)) {
       try {
-        await window.ethereum.request({
+        await provider.request({
           method: "wallet_switchEthereumChain",
           params: [{ chainId: ethers.utils.hexValue(parseInt(process.env.REACT_APP_CHAIN_ID)) }],
         });
       } catch (err) {
         if (err.code === 4902) {
-          await window.ethereum.request({
+          await provider.request({
             method: "wallet_addEthereumChain",
             params: [
               {
@@ -25,12 +28,17 @@ export const checkCorrectNetwork = async () => {
   };
 
   export const ConnectWalletHandler = async () => {
-    if (window.ethereum) {
-      let addresses = await window.ethereum.request({
+    const provider = await detectEthereumProvider();
+    if (provider) {
+      let addresses = await provider.request({
         method: "eth_requestAccounts",
       });
       let userBalance = await accountChangeHandler(addresses[0]);
       return [addresses[0], userBalance];
+    }
+    else {
+      alert("Install MetaMask")
+      return ["0x0000000000000000000000000000000000000000","0x0"]
     }
   };
 
@@ -39,7 +47,8 @@ export const checkCorrectNetwork = async () => {
     return userBalance;
   };
   export const getUserBalance = async (address) => {
-    return await window.ethereum.request({
+    const provider = await detectEthereumProvider();
+    return await provider.request({
       method: "eth_getBalance",
       params: [address, "latest"],
     });

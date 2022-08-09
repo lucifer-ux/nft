@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import detectEthereumProvider from '@metamask/detect-provider';
 import { contractRead } from "../ReadContract";
 import { ethers } from "ethers";
 import {checkCorrectNetwork, ConnectWalletHandler, accountChangeHandler, chainChangedHandler} from "../../utilities/contract"
@@ -113,8 +114,10 @@ import CircleLoader from "react-spinners/CircleLoader";
     setLoadingComp(false)
   };
 
-  window.ethereum.on("accountsChanged", accountChangeHandler);
-  window.ethereum.on("chainChanged", chainChangedHandler);
+  detectEthereumProvider().then((provider) => {
+    provider.on("accountsChanged", accountChangeHandler);
+    provider.on("chainChanged", chainChangedHandler);
+  });
 
   const isFormInValid = async () => {
     let returnValue = false;

@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import detectEthereumProvider from '@metamask/detect-provider';
 import "./RedirectForm.css";
 import { contractRead } from "../resources/ReadContract";
 import { ethers } from "ethers";
@@ -122,8 +123,10 @@ function RedirectForm({ formElements }) {
     setErrorModalValue(true);
   };
 
-  window.ethereum.on("accountsChanged", accountChangeHandler);
-  window.ethereum.on("chainChanged", chainChangedHandler);
+  detectEthereumProvider().then((provider) => {
+    provider.on("accountsChanged", accountChangeHandler);
+    provider.on("chainChanged", chainChangedHandler);
+  });
 
   const isFormInValid = async () => {
     let returnValue = false;

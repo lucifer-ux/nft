@@ -1,4 +1,5 @@
 import React from "react";
+import detectEthereumProvider from '@metamask/detect-provider';
 import Button from "./Button/Button";
 import { useState } from "react";
 import { ethers } from "ethers";
@@ -93,8 +94,10 @@ const PublicMint = () => {
     return { checkReturnValue, contractBalance};
   };
 
-  window.ethereum.on("accountsChanged", accountChangeHandler);
-  window.ethereum.on("chainChanged", chainChangedHandler);
+  detectEthereumProvider().then((provider) => {
+    provider.on("accountsChanged", accountChangeHandler);
+    provider.on("chainChanged", chainChangedHandler);
+  });
   return (
     <div >
       {/* <h1>balance : {userBalance}</h1> wallet balance
