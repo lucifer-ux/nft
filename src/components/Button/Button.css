@@ -78,22 +78,17 @@ content: '';
   transition: all .3s ease-in-out 0s;
 }
 
-.button:hover, .button:focus {
-  color: #333231;
-  transform: translateY(-6px);
+.button:hover{
+  height: 4em;
+  width: 4em;
 }
-
-#button:hover::before, #button:focus::before {
-  opacity: 1;
-}
-
-#button:hover::after, #button:focus::after {
-  animation: none;
-  display: none;
-}
-
 @media only screen and (max-width: 1250px){
   .button{
+    min-width: 150px;
+    min-height: 40px;
+    font-size: 12px;
+  }
+  .button-disabled{
     min-width: 150px;
     min-height: 40px;
     font-size: 12px;
