@@ -13,7 +13,7 @@ class MuteButton extends Component {
       )
     }
     return ( 
-      <div onClick={this.props._toggleMuteButton}>
+      <div onClick={this.props._toggleMuteButton} className='Volume_container'>
         <FontAwesomeIcon icon="volume-up"  />
       </div>
     )
