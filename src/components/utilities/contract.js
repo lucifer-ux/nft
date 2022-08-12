@@ -15,10 +15,10 @@ export const checkCorrectNetwork = async () => {
             method: "wallet_addEthereumChain",
             params: [
               {
-                chainName: "Rinkeby Mainnet",
+                chainName: "Ethereum Mainnet",
                 chainId: ethers.utils.hexValue(parseInt(process.env.REACT_APP_CHAIN_ID)),
                 nativeCurrency: { name: "ETH", decimals: 18, symbol: "ETH" },
-                rpcUrls: ["https://rinkeby.infura.io/v3/"],
+                rpcUrls: ["https://mainnet.infura.io/v3/9aa3d95b3bc440fa88ea12eaa4456161"],
               },
             ],
           });

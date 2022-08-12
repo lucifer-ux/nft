@@ -69,7 +69,7 @@ import CircleLoader from "react-spinners/CircleLoader";
       });
       console.log("Mining....", nftTx.hash);
       setTransState(
-        `https://rinkeby.etherscan.io/tx/${nftTx.hash}`
+        `https://etherscan.io/tx/${nftTx.hash}`
       );
     } catch (error) {
       setLinkFailure(true)
