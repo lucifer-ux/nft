@@ -7,7 +7,7 @@
   margin-left: 50px;
 }
   
-  .wrap-image {
+  /* .wrap-image {
     position: relative;
     width: 100px;
     margin-left: 50px;
@@ -34,8 +34,8 @@
     right: -15px;
     margin-left: 50px;
 
-  }
-  .wrap-image:hover::before {
+  } */
+  /* .wrap-image:hover::before {
     top: 15px;
     left: 15px;
     margin-left: 50px;
@@ -46,18 +46,18 @@
     right: 15px;
     margin-left: 50px;
 
-  }
+  } */
   @media only screen and (max-width: 1250px){
     .logo{
       width: 60px;
       height: 60px;
     }
-    .wrap-image{
+    /* .wrap-image{
       width: 60px;
     }
     .wrap-image::before, .wrap-image::after {
       width: 60px;
       height: 60px;  
-    }
+    } */
    }
    

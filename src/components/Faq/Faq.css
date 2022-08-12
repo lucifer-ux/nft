@@ -46,11 +46,12 @@ details > ul {
 
 .details-expanded {
 	padding: 0 2rem;
+  font-family: 'Libre Bodoni';
 }
 
 body {
   height: 100vh;
-  font-family: sans-serif;
+  font-family: 'Libre Bodoni';
   color: white;
   line-height: 1.5;
   letter-spacing: 1px;

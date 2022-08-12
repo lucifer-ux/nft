@@ -28,7 +28,7 @@ const HomePage = (props) => {
       <ReferralButton className="content" setState = {props.setState}/>
       <DirectButton className="content"/>
     </div>
-    <Card className="content"/>
+    {/* <Card className="content"/> */}
     <span className="flexBox">
     <Faq className="content"/>
 {/* socials */}
