@@ -21,7 +21,7 @@
   font-weight: 700;
   color: #313133;
   background: rgb(221,82,41);
-  background: linear-gradient(90deg, rgb(221,82,41) 0%, rgb(224, 181, 41) 100%);
+  background: linear-gradient(90deg, rgb(238, 69, 18) 0%, rgb(243, 215, 121) 100%);
   border: none;
   border-radius: 20px;
   box-shadow: 12px 12px 24px rgba(227, 164, 119, 0.615);
@@ -68,7 +68,7 @@ content: '';
   border-radius: 1000px;
   min-width: calc(300px + 12px);
   min-height: calc(60px + 12px);
-  border: 6px solid #e28a38;
+  border: 6px solid #eb983a;
   box-shadow: 0 0 60px rgba(169, 138, 52, 0.64);
   position: absolute;
   top: 50%;
@@ -87,11 +87,13 @@ content: '';
     min-width: 150px;
     min-height: 40px;
     font-size: 12px;
+    top: -110px;
   }
   .button-disabled{
     min-width: 150px;
     min-height: 40px;
     font-size: 12px;
+    top: -110px;
   }
   #button::before {
     min-width: calc(150px + 12px);

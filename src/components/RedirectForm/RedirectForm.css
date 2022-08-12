@@ -5,7 +5,7 @@
 }
 
 body{
-    background-color: #02071d;
+	background: linear-gradient(90deg, rgb(238, 69, 18) 0%, rgb(204, 29, 29) 100%);
 }
 .login-container {
 	display: block;
@@ -29,8 +29,8 @@ body{
 	right: 0;
 	bottom: 0;
 	left: 0;
-	background-image: radial-gradient(ellipse at left bottom, rgba(22, 24, 47, 1) 0%,rgba(38, 20, 72, .9) 59%, rgba(17, 27, 75, .9) 100%);
-	box-shadow: 0 -20px 150px -20px rgba(0, 0, 0, 0.5);
+	background-image: radial-gradient(ellipse at left bottom, rgb(240, 178, 108) 0%,rgba(241, 157, 79, 0.9) 59%, rgba(248, 173, 74, 0.9) 100%);
+	box-shadow: 0 -20px 150px -20px rgba(172, 145, 145, 0.5);
 }
 
 .form-login {
@@ -43,7 +43,7 @@ body{
 .login__label {
 	display: block;
 	padding-left: 1rem;
-    color: rgba(255, 255, 255, 0.5);
+    color: #000000;
 	text-transform: uppercase;
 	font-size: .75rem;
 	margin: 1.5rem;
@@ -57,14 +57,14 @@ body{
 }
 
 .login__input {
-	color: white;
+	color: black;
 	font-size: 1.15rem;
 	width: 100%;
 	padding: .5rem 1rem;
 	border: 2px solid transparent;
 	outline: none;
 	border-radius: 1.5rem;
-	background-color: rgba(255, 255, 255, 0.25);
+	background-color: white;
 	letter-spacing: 1px;
 }
 
@@ -82,9 +82,9 @@ body{
 
 .login__input:hover,
 .login__input:focus{
-	color: white;
+	color: black;
 	border: 2px solid rgba(255, 255, 255, 0.5);
-	background-color: transparent;
+	background-color: white;
 }
 
 .login__input + .login__label {
@@ -93,8 +93,8 @@ body{
 
 
 .login__submit {
-	color: #ffffff;
-	font-size: 1rem;
+	color: #000000;
+	font-size: 1.2rem;
 	font-family: 'Montserrat', sans-serif;
 	text-transform: uppercase;
 	letter-spacing: 1px;
@@ -103,7 +103,7 @@ body{
 	border-radius: 2rem;
 	display: block;
 	width: 100%;
-	background-color: rgba(17, 97, 237, .75);
+	background: linear-gradient(90deg, rgb(238, 69, 18) 0%, rgb(255, 160, 8) 100%);
 	border: none;
 	cursor: pointer;
 }
