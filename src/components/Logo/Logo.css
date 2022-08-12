@@ -19,7 +19,7 @@
     height: 100px;
     position: absolute;
     z-index: -1;
-    border: 2px solid rgba(24, 14, 13, 0.733);
+    border: 2px solid #e28a38;
     transition: all 0.25s ease-out;
     margin-left: 50px;
   }

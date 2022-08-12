@@ -1,7 +1,7 @@
 .modalBackground {
     width: 100vw;
     height: 100vw;
-    background-color: #6699cc;
+    background: linear-gradient(90deg, rgb(238, 69, 18) 0%, rgb(243, 215, 121) 100%);
     display: flex;
     justify-content: center;
     align-items: center;

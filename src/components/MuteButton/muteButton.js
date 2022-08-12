@@ -8,7 +8,7 @@ class MuteButton extends Component {
     if (this.props.isMuted === true) {
       return (
         <div onClick={this.props._toggleMuteButton} className='Volume_container'>
-          <FontAwesomeIcon icon="volume-mute" />
+          <FontAwesomeIcon icon="volume-mute" className='icon-icon'/>
         </div>
       )
     }

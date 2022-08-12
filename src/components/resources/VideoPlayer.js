@@ -19,14 +19,14 @@ const VideoPlayer = () => {
     <video className='videoTag' playsInline autoPlay loop muted
     style={{
       position: "absolute",
-      width: "100%",
+      width: "100vw",
       left: "50%",
-      top: "50%",
-      height: "100%",
+      top: "45%",
+      height: "auto",
       objectFit: "cover",
       transform: "translate(-50%,-50%)",
       zIndex: "-1",
-      opacity: "0.45"
+      opacity: "0.8",
     }}
     >
     <source src={smaple} type='video/mp4' />
