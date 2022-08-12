@@ -87,11 +87,13 @@ content: '';
     min-width: 150px;
     min-height: 40px;
     font-size: 12px;
+    top: 160px;
   }
   .button-disabled{
     min-width: 150px;
     min-height: 40px;
     font-size: 12px;
+    top: 160px;
   }
   #button::before {
     min-width: calc(150px + 12px);
