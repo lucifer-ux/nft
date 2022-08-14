@@ -9,11 +9,13 @@ import Banner from './Banner/Banner';
 import GenerateReferal from './GenerateReferal';
 import  Card  from './Card/Card';
 import VideoPlayer from './resources/VideoPlayer';
+import OpenSeaLogo from './OpenSeaLogo/Logo';
 
 const HomePage = (props) => {
   return (
       <>
       <VideoPlayer/>
+      <OpenSeaLogo/>
       <div className="bg"></div>
 <div className="bg bg2"></div>
 <div className="bg bg3"></div>  

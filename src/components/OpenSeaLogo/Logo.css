@@ -1,0 +1,22 @@
+.openSeaLogo{
+    float: right;
+    height: 60px;
+    width: 60px;
+margin-right:70px;
+}
+
+
+@media only screen and (max-width: 1250px){
+    .openSeaLogo{
+        height: 50px;
+        width: 50px;
+        margin-right:60px;
+    }
+}
+@media only screen and (max-width: 650px){
+    .openSeaLogo{
+        height: 30px;
+        width: 30px;
+        margin-right:40px;
+    }
+}
