@@ -32,7 +32,7 @@ function RedirectForm({ formElements }) {
     console.log(minReferralMintPrice);
     let hasmintedYetValue = await contractRead.hasMinted(defaultAccount);
     let isTokenPrivileged = await contractRead.isTokenPrivileged(parseInt(formData.tokenId))
-    let MintingPriceLessThanMinReferralMintPrice = ethers.utils.parseEther(formData.mintingPrice).lt(minReferralMintPrice)
+    let MintingPriceLessThanMinReferralMintPrice = ethers.utils.parseEther(formData.mintingPrice).lte(minReferralMintPrice)
     let BalanceLessThanMintingPrice = ethers.BigNumber.from(userBalance).lte(ethers.utils.parseEther(formData.mintingPrice))
 
     if (hasmintedYetValue) {
@@ -42,8 +42,8 @@ function RedirectForm({ formElements }) {
       setErrorModalValue(true);
     }
     if (MintingPriceLessThanMinReferralMintPrice) {
-      console.log("low minting price");
-      setMintingPriceCheck("low minting price");
+      console.log(`low minting price, should be strictly greater than ${ethers.utils.formatEther(minReferralMintPrice)}`);
+      setMintingPriceCheck(`low minting price, should be strictly greater than ${ethers.utils.formatEther(minReferralMintPrice)}`);
     }
     if(!isTokenPrivileged){
       console.log("token  ID not privileged")

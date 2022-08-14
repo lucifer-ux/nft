@@ -54,7 +54,7 @@ import CircleLoader from "react-spinners/CircleLoader";
     console.log("minReferralPrice: " + minReferralMintPrice);
     console.log(ownedPrivilegedTokenIDs[0])
     let ifRightTokenEntered = ownedPrivilegedTokenIDs.includes(parseInt(formData.tokenId))
-    let MintingPriceLessThanMinReferralMintPrice = ethers.utils.parseEther(formData.mintingPrice).lt(minReferralMintPrice)
+    let MintingPriceLessThanMinReferralMintPrice = ethers.utils.parseEther(formData.mintingPrice).lte(minReferralMintPrice)
     let AddressHasMinted = await contractRead.hasMinted(formData.walletAddress)
 
 
@@ -66,8 +66,8 @@ import CircleLoader from "react-spinners/CircleLoader";
     }
 
     if (MintingPriceLessThanMinReferralMintPrice) {
-      setMintingPriceCheck("low minting price")
-      console.log("low minting price");
+      setMintingPriceCheck(`low minting price, should be strictly greater than ${ethers.utils.formatEther(minReferralMintPrice)}`)
+      console.log(`low minting price, should be strictly greater than ${ethers.utils.formatEther(minReferralMintPrice)}`);
     }
 
     if(!ifRightTokenEntered) {
