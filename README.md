@@ -1,6 +1,6 @@
-# Getting Started with Create React App
+# Dream Date World: Chad Card
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+The Chad Card is a set of 696 unique tokens of the world's first Refer to Earn NFT, with a chance to earn up to 50% on each referral. The owners of the Elite Chad Card and the Alpha Chad Card would have the discretion to recommend individuals for a limited number of NFT passes to enter Dream Date World.
 
 ## Available Scripts
 
